@@ -1,11 +1,21 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, CameraControls } from "@react-three/drei";
+import { Environment, CameraControls, useProgress } from "@react-three/drei";
 import Model from "./model-404";
 
-export default function Scene404() {
+function LoadReporter({ onLoad }: { onLoad: () => void }) {
+  const { active } = useProgress();
+
+  useEffect(() => {
+    if (!active) onLoad();
+  }, [active, onLoad]);
+
+  return null;
+}
+
+export default function Scene404({ onLoad }: { onLoad?: () => void }) {
   const [key, setKey] = useState(0);
 
   const handleCreated = useCallback((state: { gl: { domElement: HTMLCanvasElement } }) => {
@@ -40,6 +50,7 @@ export default function Scene404() {
       onCreated={handleCreated}
       style={{ background: "#000" }}
     >
+      {onLoad && <LoadReporter onLoad={onLoad} />}
       <ambientLight intensity={2} />
       <directionalLight intensity={4} position={[0, 0.1, 1]} />
       <Model />
