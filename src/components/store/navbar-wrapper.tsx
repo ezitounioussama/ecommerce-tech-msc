@@ -41,7 +41,7 @@ function AuthButtons({ className = "" }: { className?: string }) {
         <SignUpButton mode="modal">
           <button
             type="button"
-            className={`px-4 py-2 rounded-md text-sm font-semibold transition duration-200 bg-accent-blue text-white hover:bg-accent-blue/80 ${className}`}
+            className={`px-4 py-2 rounded-md text-sm font-semibold transition duration-200 bg-accent-blue text-primary-foreground hover:bg-accent-blue/80 ${className}`}
           >
             Get Started
           </button>

@@ -7,6 +7,7 @@ import { ProductsGrid } from "@/components/store/products-grid";
 import { CategorySidebar } from "@/components/store/category-sidebar";
 import { ProductSort } from "@/components/store/product-sort";
 import { Button } from "@/components/ui/button";
+import { DiaTextReveal } from "@/components/ui/dia-text-reveal";
 import type { Product, Category } from "@/types";
 
 interface ProductsPageClientProps {
@@ -64,8 +65,12 @@ export function ProductsPageClient({ products, categories }: ProductsPageClientP
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Products
+        <h1>
+          <DiaTextReveal
+            text="Products"
+            colors={["#3B82F6", "#818cf8", "#f472b6"]}
+            className="text-3xl font-bold tracking-tight"
+          />
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {filtered.length} product{filtered.length !== 1 ? "s" : ""} available

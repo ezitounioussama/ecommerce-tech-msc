@@ -76,6 +76,62 @@ Every transition should feel intentional.
 
 ---
 
+## Theme System
+
+### Dark-First (default)
+
+The `:root` selector contains all dark-mode CSS custom properties. Light mode is
+an opt-in override via the `.light` class on `<html>`.
+
+```css
+:root { /* dark mode */
+  --ts-bg: oklch(0.145 0 0);
+  --ts-foreground: oklch(0.985 0 0);
+  --ts-card: #171717;
+  --ts-surface: #111111;
+  /* ... */
+}
+
+.light { /* light mode override */
+  --ts-bg: oklch(1 0 0);
+  --ts-foreground: oklch(0.145 0 0);
+  --ts-card: oklch(1 0 0);
+  --ts-surface: #f5f5f5;
+  /* ... */
+}
+```
+
+The `<AnimatedThemeToggler>` component toggles the `.light` class on `<html>`
+and persists the preference to `localStorage`.
+
+### Design Tokens Naming
+
+All tokens use the `--ts-*` prefix and are referenced in Tailwind's `@theme inline`
+block. Use them directly in JSX:
+
+```tsx
+className="bg-background text-foreground border-border"
+```
+
+### CSS Variable Usage in Components
+
+Never hardcode color values (`#111`, `rgba(10,10,10,0.85)`, `text-white`).
+Always use CSS custom properties:
+
+- `var(--ts-bg)` / `bg-background`
+- `var(--ts-surface)` / `bg-surface`
+- `var(--ts-foreground)` / `text-foreground`
+- `var(--ts-border)` / `border-border`
+- `var(--ts-primary-foreground)` / `text-primary-foreground`
+
+For dynamic backgrounds in motion animations, use `color-mix`:
+
+```ts
+backgroundColor: "color-mix(in oklch, var(--ts-bg) 85%, transparent)"
+```
+
+---
+
 ## Design Style
 
 Dark First.

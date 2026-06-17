@@ -248,6 +248,26 @@ Avoid unnecessary API routes.
 
 ---
 
+# Proxy (Middleware)
+
+This project uses Next.js 16's `proxy.ts` convention instead of `middleware.ts`.
+
+File: `src/proxy.ts`
+
+The proxy matcher must include Clerk's proxy path:
+
+```ts
+export const config = {
+  matcher: [
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+    "/__clerk/:path*",
+  ],
+};
+```
+
+---
+
 # Authentication
 
 Provider:
@@ -256,7 +276,27 @@ Provider:
 Clerk
 ```
 
-Requirements:
+## Setup
+
+The project is linked to the TechSphere Clerk application (`app_3FHSCIZUZztc04ZXd7MVdlW1J3K`).
+
+Key files:
+- `src/app/layout.tsx` — `ClerkProvider` wraps the entire app with `shadcn` theme
+- `src/proxy.ts` — `clerkMiddleware()` with Clerk proxy path
+- `src/components/store/navbar-wrapper.tsx` — `Show`, `SignInButton`, `SignUpButton`, `UserButton`
+- `src/app/sign-in/[[...sign-in]]/page.tsx` — Sign-in page with `<SignIn />`
+- `src/app/sign-up/[[...sign-up]]/page.tsx` — Sign-up page with `<SignUp />`
+
+Components used from `@clerk/nextjs`:
+- `ClerkProvider` — wraps root layout
+- `Show` — renders children based on auth state (`"signed-in"` / `"signed-out"`)
+- `SignInButton` — modal-based sign-in trigger
+- `SignUpButton` — modal-based sign-up trigger
+- `UserButton` — avatar + dropdown for signed-in users
+
+Auth controls use `mode="modal"` to open Clerk's hosted UI in a modal without navigating away.
+
+## Requirements
 
 * Protect all admin routes
 * Protect checkout flow

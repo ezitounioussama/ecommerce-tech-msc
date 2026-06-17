@@ -11,6 +11,7 @@ import {
   IconTruckDelivery,
   IconDeviceLaptop,
 } from "@tabler/icons-react";
+import { DiaTextReveal } from "@/components/ui/dia-text-reveal";
 
 export default function FeaturesSection() {
   const features = [
@@ -47,10 +48,19 @@ export default function FeaturesSection() {
   return (
     <div className="relative z-20 mx-auto max-w-7xl px-4 py-10 lg:py-40">
       <div className="px-8">
-        <h4 className="mx-auto max-w-5xl text-center text-3xl font-medium tracking-tight text-primary lg:text-5xl lg:leading-tight">
-          Everything you need.
+        <h4 className="mx-auto max-w-5xl text-center text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight">
+          <DiaTextReveal
+            text="Everything you need."
+            colors={["#3B82F6", "#818cf8", "#f472b6"]}
+            className="text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight"
+          />
           <br />
-          <span className="text-accent-blue">Nothing you don&apos;t.</span>
+          <DiaTextReveal
+            text="Nothing you don't."
+            colors={["#f472b6", "#818cf8", "#3B82F6"]}
+            textColor="var(--ts-accent-blue)"
+            className="text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight"
+          />
         </h4>
         <p className="mx-auto my-4 max-w-2xl text-center text-sm font-normal text-secondary lg:text-base">
           From browsing to delivery, TechSphere delivers a premium shopping

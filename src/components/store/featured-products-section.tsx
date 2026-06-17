@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { IconArrowRight, IconDeviceLaptop, IconCpu, IconDeviceMobile, IconKeyboard } from "@tabler/icons-react";
 import { buttonVariants } from "@/components/ui/button";
 import { CometCard } from "@/components/ui/comet-card";
+import { DiaTextReveal } from "@/components/ui/dia-text-reveal";
 import { MOCK_PRODUCTS } from "@/constants/products";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -32,8 +33,12 @@ export function FeaturedProductsSection() {
             <span className="text-[11px] font-medium uppercase tracking-widest text-accent-blue">
               Featured
             </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-              Our Top Picks
+            <h2 className="mt-2">
+              <DiaTextReveal
+                text="Our Top Picks"
+                colors={["#3B82F6", "#818cf8", "#f472b6", "#34d399"]}
+                className="text-3xl font-bold tracking-tight lg:text-4xl"
+              />
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Hand-selected premium technology for enthusiasts

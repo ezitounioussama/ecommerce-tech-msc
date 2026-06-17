@@ -88,11 +88,11 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
       animate={{
         backdropFilter: visible ? "blur(16px)" : "none",
         boxShadow: visible
-          ? "0 0 0 1px rgba(255,255,255,0.06), 0 1px 1px rgba(0,0,0,0.3)"
+          ? "0 0 0 1px var(--ts-border), 0 1px 1px rgba(0,0,0,0.3)"
           : "none",
         width: visible ? "40%" : "100%",
         y: visible ? 16 : 0,
-        backgroundColor: visible ? "rgba(10,10,10,0.85)" : "transparent",
+        backgroundColor: visible ? "color-mix(in oklch, var(--ts-bg) 85%, transparent)" : "transparent",
       }}
       transition={{
         type: "spring",
@@ -150,14 +150,14 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
       animate={{
         backdropFilter: visible ? "blur(16px)" : "none",
         boxShadow: visible
-          ? "0 0 0 1px rgba(255,255,255,0.06)"
+          ? "0 0 0 1px var(--ts-border)"
           : "none",
         width: visible ? "92%" : "100%",
         paddingRight: visible ? "12px" : "0px",
         paddingLeft: visible ? "12px" : "0px",
         borderRadius: visible ? "12px" : "2rem",
         y: visible ? 12 : 0,
-        backgroundColor: visible ? "rgba(10,10,10,0.85)" : "transparent",
+        backgroundColor: visible ? "color-mix(in oklch, var(--ts-bg) 85%, transparent)" : "transparent",
       }}
       transition={{
         type: "spring",
@@ -237,7 +237,7 @@ export const NavbarLogo = () => {
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal"
     >
       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-blue">
-        <span className="text-xs font-bold text-white">T</span>
+        <span className="text-xs font-bold text-primary-foreground">T</span>
       </div>
       <span className="text-base font-semibold tracking-tight text-primary">
         TechSphere
@@ -268,13 +268,13 @@ export const NavbarButton = ({
 
   const variantStyles = {
     primary:
-      "bg-accent-blue text-white hover:bg-accent-blue/80",
+      "bg-accent-blue text-primary-foreground hover:bg-accent-blue/80",
     secondary:
       "bg-transparent text-secondary hover:text-primary",
     dark:
       "bg-surface text-primary hover:bg-card",
     gradient:
-      "bg-gradient-to-r from-accent-blue to-accent-purple text-white",
+      "bg-gradient-to-r from-accent-blue to-accent-purple text-primary-foreground",
   };
 
   return (

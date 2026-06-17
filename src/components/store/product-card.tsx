@@ -59,7 +59,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
         </div>
 
         {product.featured && (
-          <span className="absolute left-2 top-2 rounded-full bg-accent-blue/90 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white">
+          <span className="absolute left-2 top-2 rounded-full bg-accent-blue/90 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary-foreground">
             Featured
           </span>
         )}
