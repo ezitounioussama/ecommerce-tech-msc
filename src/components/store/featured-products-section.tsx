@@ -37,6 +37,7 @@ export function FeaturedProductsSection() {
               <DiaTextReveal
                 text="Our Top Picks"
                 colors={["#3B82F6", "#818cf8", "#f472b6", "#34d399"]}
+                textColor="var(--color-foreground)"
                 className="text-3xl font-bold tracking-tight lg:text-4xl"
               />
             </h2>

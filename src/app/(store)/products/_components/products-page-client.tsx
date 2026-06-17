@@ -69,6 +69,7 @@ export function ProductsPageClient({ products, categories }: ProductsPageClientP
           <DiaTextReveal
             text="Products"
             colors={["#3B82F6", "#818cf8", "#f472b6"]}
+            textColor="var(--color-foreground)"
             className="text-3xl font-bold tracking-tight"
           />
         </h1>

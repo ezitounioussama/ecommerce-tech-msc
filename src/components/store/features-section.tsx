@@ -52,13 +52,14 @@ export default function FeaturesSection() {
           <DiaTextReveal
             text="Everything you need."
             colors={["#3B82F6", "#818cf8", "#f472b6"]}
+            textColor="var(--color-foreground)"
             className="text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight"
           />
           <br />
           <DiaTextReveal
             text="Nothing you don't."
             colors={["#f472b6", "#818cf8", "#3B82F6"]}
-            textColor="var(--ts-accent-blue)"
+            textColor="var(--color-accent-blue)"
             className="text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight"
           />
         </h4>

@@ -80,7 +80,7 @@ export interface DiaTextRevealProps extends Omit<
   colors?: string[]
   /**
    * CSS color for revealed text after the sweep and for leading/trailing regions during the animation.
-   * @defaultValue `"var(--foreground)"`
+   * @defaultValue `"var(--color-foreground)"`
    */
   textColor?: string
   /**
@@ -127,7 +127,7 @@ export interface DiaTextRevealProps extends Omit<
 export function DiaTextReveal({
   text,
   colors = DEFAULT_COLORS,
-  textColor = "var(--foreground)",
+  textColor = "var(--color-foreground)",
   duration = 1.5,
   delay = 0,
   repeat = false,
