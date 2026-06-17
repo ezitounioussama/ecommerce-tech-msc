@@ -92,7 +92,7 @@ src/
 │
 ├── constants/
 │
-└── middleware.ts
+└── proxy.ts
 ```
 
 ---
