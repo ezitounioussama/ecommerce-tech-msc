@@ -12,10 +12,9 @@ import {
   NavbarLogo,
 } from "@/components/ui/resizable-navbar";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { AuthDialog } from "@/components/store/auth-dialog";
 import {
   Show,
-  SignInButton,
-  SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
 
@@ -26,26 +25,11 @@ const navItems = [
   { name: "Support", link: "/support" },
 ];
 
-function AuthButtons({ className = "" }: { className?: string }) {
+function AuthButtons() {
   return (
     <>
       <Show when="signed-out">
-        <SignInButton mode="modal">
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-md text-sm font-semibold transition duration-200 bg-transparent text-secondary hover:text-primary ${className}`}
-          >
-            Sign In
-          </button>
-        </SignInButton>
-        <SignUpButton mode="modal">
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-md text-sm font-semibold transition duration-200 bg-accent-blue text-primary-foreground hover:bg-accent-blue/80 ${className}`}
-          >
-            Get Started
-          </button>
-        </SignUpButton>
+        <AuthDialog />
       </Show>
       <Show when="signed-in">
         <UserButton
@@ -99,7 +83,9 @@ export function NavbarWrapper() {
             </a>
           ))}
           <div className="mt-4 flex w-full flex-col gap-2">
-            <AuthButtons className="w-full text-center" />
+            <div className="flex w-full justify-center">
+              <AuthButtons />
+            </div>
           </div>
         </MobileNavMenu>
       </MobileNav>
