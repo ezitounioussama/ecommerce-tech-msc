@@ -12,6 +12,7 @@ import {
   NavbarLogo,
   NavbarButton,
 } from "@/components/ui/resizable-navbar";
+import { AnimatedThemeToggler } from "@/components/store/theme-toggler";
 
 const navItems = [
   { name: "Products", link: "/products" },
@@ -28,7 +29,8 @@ export function NavbarWrapper() {
       <NavBody>
         <NavbarLogo />
         <NavItems items={navItems} />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <AnimatedThemeToggler />
           <NavbarButton variant="secondary" href="/sign-in">
             Sign In
           </NavbarButton>
@@ -40,10 +42,13 @@ export function NavbarWrapper() {
       <MobileNav>
         <MobileNavHeader>
           <NavbarLogo />
-          <MobileNavToggle
-            isOpen={isMobileMenuOpen}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          />
+          <div className="flex items-center gap-2">
+            <AnimatedThemeToggler />
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+          </div>
         </MobileNavHeader>
         <MobileNavMenu
           isOpen={isMobileMenuOpen}
