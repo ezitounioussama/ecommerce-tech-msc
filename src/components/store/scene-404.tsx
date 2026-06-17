@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Canvas } from "@react-three/fiber";
+import { Environment, CameraControls } from "@react-three/drei";
 import Model from "./model-404";
 
 export default function Scene404() {
@@ -13,8 +14,15 @@ export default function Scene404() {
       e.preventDefault();
       setKey((k) => k + 1);
     };
+    const onContextRestored = () => {
+      setKey((k) => k + 1);
+    };
     canvas.addEventListener("webglcontextlost", onContextLost);
-    return () => canvas.removeEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
+    };
   }, []);
 
   return (
@@ -22,9 +30,9 @@ export default function Scene404() {
       key={key}
       orthographic
       camera={{ position: [0, 0, 1], zoom: 800 }}
-      dpr={[1, 1.2]}
+      dpr={[1, 1.5]}
       gl={{
-        antialias: false,
+        antialias: true,
         alpha: false,
         powerPreference: "high-performance",
         failIfMajorPerformanceCaveat: false,
@@ -35,6 +43,8 @@ export default function Scene404() {
       <ambientLight intensity={2} />
       <directionalLight intensity={4} position={[0, 0.1, 1]} />
       <Model />
+      <CameraControls />
+      <Environment preset="city" />
     </Canvas>
   );
 }

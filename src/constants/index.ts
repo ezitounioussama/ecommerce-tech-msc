@@ -1,5 +1,6 @@
 export const APP_NAME = "TechSphere";
 export const APP_DESCRIPTION = "Premium Technology Store";
+export const CURRENT_YEAR = 2026;
 
 export const PRODUCT_SORT_OPTIONS = [
   { label: "Newest", value: "newest" },

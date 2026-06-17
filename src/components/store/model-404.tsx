@@ -12,7 +12,7 @@ export default function Model() {
 
   return (
     <group scale={viewport.width / 1.5}>
-      {scene.children.slice(0, 4).map((mesh, i) => (
+      {scene.children.map((mesh, i) => (
         <Shard key={i} data={mesh} index={i} />
       ))}
       <TextContent />
@@ -24,11 +24,13 @@ function Shard({ data, index }: { data: Mesh; index: number }) {
   return (
     <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.4}>
       <mesh {...data}>
-        <meshStandardMaterial
-          color={index % 2 === 0 ? "#ffffff" : "#e0e0e0"}
-          metalness={0.3}
-          roughness={0.2}
-          envMapIntensity={1}
+        <meshPhysicalMaterial
+          color={index % 2 === 0 ? "#ffffff" : "#e8e8e8"}
+          metalness={0}
+          roughness={0}
+          envMapIntensity={1.5}
+          transparent
+          opacity={0.7}
         />
       </mesh>
     </Float>
@@ -39,6 +41,7 @@ function TextContent() {
   return (
     <group>
       <Text
+        font="/fonts/Poppins-Bold.ttf"
         position={[0, 0, -0.1]}
         fontSize={0.4}
         color="white"
@@ -46,15 +49,6 @@ function TextContent() {
         anchorY="middle"
       >
         404
-      </Text>
-      <Text
-        position={[0, -0.15, -0.1]}
-        fontSize={0.03}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-      >
-        Page not found
       </Text>
     </group>
   );

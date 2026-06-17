@@ -1,5 +1,6 @@
-import {ClerkProvider} from "@clerk/nextjs";
-import {shadcn} from "@clerk/ui/themes";
+import { Suspense } from "react";
+import { ClerkProvider } from "@clerk/nextjs";
+import { shadcn } from "@clerk/ui/themes";
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import { poppins, pachel } from "@/lib/fonts";
@@ -39,10 +40,10 @@ export default function RootLayout({
       className={`${poppins.variable} ${geistMono.variable} ${pachel.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-primary">
-        <ClerkProvider appearance={{theme: shadcn}}>
-          <SmoothScroll>
-            {children}
-          </SmoothScroll>
+        <ClerkProvider appearance={{ theme: shadcn }}>
+          <Suspense fallback={null}>
+            <SmoothScroll>{children}</SmoothScroll>
+          </Suspense>
         </ClerkProvider>
       </body>
     </html>

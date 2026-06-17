@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { DiaTextReveal } from "@/components/ui/dia-text-reveal";
+import { CURRENT_YEAR } from "@/constants";
 import {
   IconBrandX,
   IconBrandGithub,
@@ -198,7 +199,7 @@ export function Footer() {
           >
             <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 sm:flex-row">
               <p className="text-xs text-muted-foreground">
-                &copy; {new Date().getFullYear()} TechSphere. All rights reserved.
+                &copy; {CURRENT_YEAR} TechSphere. All rights reserved.
               </p>
               <div className="flex gap-4 text-xs text-muted-foreground">
                 <Link href="/privacy" className="transition-colors hover:text-foreground">
