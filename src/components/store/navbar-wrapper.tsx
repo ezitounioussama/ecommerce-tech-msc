@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import {
   Navbar,
@@ -22,7 +23,7 @@ const navItems = [
   { name: "Products", link: "/products" },
   { name: "Categories", link: "/categories" },
   { name: "Deals", link: "/deals" },
-  { name: "Support", link: "/support" },
+  { name: "Contact", link: "/contact" },
 ];
 
 function AuthButtons() {
@@ -73,14 +74,14 @@ export function NavbarWrapper() {
           onClose={() => setIsMobileMenuOpen(false)}
         >
           {navItems.map((item, idx) => (
-            <a
+            <Link
               key={`mobile-link-${idx}`}
               href={item.link}
               onClick={() => setIsMobileMenuOpen(false)}
               className="w-full rounded-md px-4 py-2 text-secondary transition-colors hover:bg-card hover:text-primary"
             >
               {item.name}
-            </a>
+            </Link>
           ))}
           <div className="mt-4 flex w-full flex-col gap-2">
             <div className="flex w-full justify-center">
