@@ -76,7 +76,7 @@ export const MacbookScroll = ({
           translateY: textTransform,
           opacity: textOpacity,
         }}
-        className="mb-20 text-center text-3xl font-bold text-primary"
+        className="heading-1 mb-20 text-center text-primary"
       >
         {title || (
           <span>
@@ -168,9 +168,10 @@ export const Lid = ({
         <div className="absolute inset-0 rounded-lg bg-[#272729]" />
         <Image
           src={"/hero.jpg"}
-          alt="aceternity logo"
+          alt="MacBook display"
           width={1280}
           height={720}
+          priority
           className="absolute inset-0 h-full w-full rounded-lg object-cover object-left-top"
         />
       </motion.div>

@@ -48,19 +48,19 @@ export default function FeaturesSection() {
   return (
     <div className="relative z-20 mx-auto max-w-7xl px-3 py-10 lg:py-40">
       <div className="px-8">
-        <h4 className="mx-auto max-w-5xl text-center text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight">
+        <h4 className="mx-auto max-w-5xl text-center">
           <DiaTextReveal
             text="Everything you need."
             colors={["#3B82F6", "#818cf8", "#f472b6"]}
             textColor="var(--color-foreground)"
-            className="text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight"
+            className="heading-1"
           />
           <br />
           <DiaTextReveal
             text="Nothing you don't."
             colors={["#f472b6", "#818cf8", "#3B82F6"]}
             textColor="var(--color-accent-blue)"
-            className="text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight"
+            className="heading-1"
           />
         </h4>
         <p className="mx-auto my-4 max-w-2xl text-center text-sm font-normal text-secondary lg:text-base">
@@ -100,7 +100,7 @@ const FeatureCard = ({
 
 const FeatureTitle = ({ children }: { children?: React.ReactNode }) => {
   return (
-    <p className="mx-auto max-w-5xl text-left text-xl tracking-tight text-primary md:text-2xl md:leading-snug">
+    <p className="mx-auto max-w-5xl text-left heading-3 text-primary">
       {children}
     </p>
   );
@@ -226,11 +226,15 @@ export const Globe = ({ className }: { className?: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const gl = canvas.getContext("webgl") || canvas.getContext("webgl2");
+    if (!gl) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
-    const globe = createGlobe(canvasRef.current, {
+    const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
       width: 600 * dpr,
       height: 600 * dpr,

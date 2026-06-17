@@ -71,7 +71,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
           {product.brand}
         </span>
 
-        <h3 className="line-clamp-1 text-sm font-medium text-foreground transition-colors group-hover:text-accent-blue">
+        <h3 className="line-clamp-1 heading-4 text-foreground transition-colors group-hover:text-accent-blue">
           {product.name}
         </h3>
 

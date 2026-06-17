@@ -23,7 +23,7 @@ export function ProductsGrid({ products, isEmpty }: ProductsGridProps) {
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
           <IconFilterOff className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-medium text-foreground">No products found</h3>
+        <h3 className="text-lg font-heading font-medium text-foreground">No products found</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           Try adjusting your filters or search terms.
         </p>
@@ -41,7 +41,7 @@ export function ProductsGrid({ products, isEmpty }: ProductsGridProps) {
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
           <IconPackages className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-medium text-foreground">Loading products...</h3>
+        <h3 className="text-lg font-heading font-medium text-foreground">Loading products...</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           Please wait while we fetch the latest inventory.
         </p>

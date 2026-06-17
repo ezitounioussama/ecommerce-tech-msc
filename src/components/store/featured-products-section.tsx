@@ -39,7 +39,7 @@ export function FeaturedProductsSection() {
                 text="Our Top Picks"
                 colors={["#3B82F6", "#818cf8", "#f472b6", "#34d399"]}
                 textColor="var(--color-foreground)"
-                className="text-3xl font-bold tracking-tight lg:text-4xl"
+                className="heading-2"
               />
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -80,7 +80,7 @@ export function FeaturedProductsSection() {
                       <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                         {product.brand}
                       </span>
-                      <h3 className="mt-1 line-clamp-1 text-sm font-medium text-foreground">
+                      <h3 className="mt-1 line-clamp-1 heading-4 text-foreground">
                         {product.name}
                       </h3>
                       <div className="mt-2 flex items-baseline gap-2">

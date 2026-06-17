@@ -92,7 +92,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
           : "none",
         width: visible ? "40%" : "100%",
         y: visible ? 16 : 0,
-        backgroundColor: visible ? "color-mix(in oklch, var(--ts-bg) 85%, transparent)" : "transparent",
+        backgroundColor: visible ? "color-mix(in oklch, var(--ts-bg) 85%, transparent)" : "color-mix(in oklch, var(--ts-bg) 0%, transparent)",
       }}
       transition={{
         type: "spring",
@@ -157,7 +157,7 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
         paddingLeft: visible ? "12px" : "0px",
         borderRadius: visible ? "12px" : "2rem",
         y: visible ? 12 : 0,
-        backgroundColor: visible ? "color-mix(in oklch, var(--ts-bg) 85%, transparent)" : "transparent",
+        backgroundColor: visible ? "color-mix(in oklch, var(--ts-bg) 85%, transparent)" : "color-mix(in oklch, var(--ts-bg) 0%, transparent)",
       }}
       transition={{
         type: "spring",
@@ -239,7 +239,7 @@ export const NavbarLogo = () => {
       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-blue">
         <span className="text-xs font-bold text-primary-foreground">T</span>
       </div>
-      <span className="text-base font-semibold tracking-tight text-primary">
+      <span className="text-base font-heading font-semibold tracking-tight text-primary">
         TechSphere
       </span>
     </a>
