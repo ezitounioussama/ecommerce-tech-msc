@@ -44,6 +44,8 @@ This project is a modern full-stack eCommerce platform focused on technology pro
 8. Mobile First
 9. Production Ready
 10. Clean Architecture
+11. **Use latest Next.js patterns** — always leverage `use cache`, React 19 features, and current API surface.
+12. **Use Context7 MCP** before writing code against any library/framework — fetch current docs to ensure correct API usage.
 
 ---
 
@@ -236,15 +238,61 @@ Only when required.
 
 ## Data Fetching
 
-Prefer:
+All data fetching must use the `"use cache"` directive to enable automatic caching, deduplication, and optimal static/dynamic rendering.
+
+### `use cache` Data Layer
+
+Create data access functions in `src/lib/data/` with `"use cache"` per function:
 
 ```ts
-Server Actions
+// src/lib/data/products.ts
+import { MOCK_PRODUCTS } from "@/constants/products";
+import type { Product } from "@/types";
+
+export async function getProducts(): Promise<Product[]> {
+  "use cache";
+  return MOCK_PRODUCTS;
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  "use cache";
+  return MOCK_PRODUCTS.find((p) => p.slug === slug) ?? null;
+}
+
+export async function getFeaturedProducts(): Promise<Product[]> {
+  "use cache";
+  return MOCK_PRODUCTS.filter((p) => p.featured);
+}
 ```
 
-over client-side fetching.
+Consume in server components:
 
-Avoid unnecessary API routes.
+```tsx
+// page.tsx
+import { getProducts, getCategories } from "@/lib/data";
+
+export default async function Page() {
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
+  return <ClientComponent products={products} categories={categories} />;
+}
+```
+
+When moving from mock data to real DB calls, only the function body changes — the caching strategy stays intact.
+
+### Setup
+
+The `cacheComponents: true` flag is enabled in `next.config.ts` — do not remove it.
+
+### Rules
+
+- Every `"use cache"` function must be `async`.
+- Functions with `"use cache"` cannot be called from Client Components. Fetch data in Server Components and pass as props.
+- Server Actions (mutations) do NOT use `"use cache"`.
+- Wrap dynamic auth/service providers (`ClerkProvider`) in `<Suspense fallback={null}>` in the root layout.
+- Replace `new Date()` in client components with static constants to avoid prerender errors.
 
 ---
 
@@ -758,6 +806,8 @@ When generating code:
 8. Avoid unnecessary dependencies.
 9. Optimize for production readiness.
 10. Explain architectural decisions when significant changes are introduced.
+11. **Always use Context7 MCP** before writing code against any library/framework (Next.js, Clerk, drei, motion, shadcn, etc.) — fetch current docs to ensure correct API usage.
+12. **Always use `"use cache"`** for data access functions in `src/lib/data/`. Every async function that reads data must use the `"use cache"` directive. Server Actions (mutations) are the only exception.
 
 ```
 ```
