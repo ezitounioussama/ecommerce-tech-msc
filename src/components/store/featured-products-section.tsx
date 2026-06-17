@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { IconArrowRight, IconDeviceLaptop, IconCpu, IconDeviceMobile, IconKeyboard } from "@tabler/icons-react";
 import { buttonVariants } from "@/components/ui/button";
+import { CometCard } from "@/components/ui/comet-card";
 import { MOCK_PRODUCTS } from "@/constants/products";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -51,39 +52,44 @@ export function FeaturedProductsSection() {
           {featured.map((product, index) => {
             const Icon = categoryIcons[product.categoryId] || IconDeviceLaptop;
             return (
-              <motion.article
+              <motion.div
                 key={product._id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="group relative overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-accent-blue/30 hover:shadow-[0_0_30px_-6px] hover:shadow-accent-blue/10"
               >
-                <Link href={`/products/${product.slug}`}>
-                  <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-surface to-card">
-                    <Icon className="h-16 w-16 text-accent-blue/20 transition-all duration-500 group-hover:scale-110 group-hover:text-accent-blue/30" />
-                  </div>
-
-                  <div className="p-4">
-                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                      {product.brand}
-                    </span>
-                    <h3 className="mt-1 line-clamp-1 text-sm font-medium text-foreground transition-colors group-hover:text-accent-blue">
-                      {product.name}
-                    </h3>
-                    <div className="mt-2 flex items-baseline gap-2">
-                      <span className="text-lg font-semibold text-foreground">
-                        ${product.price.toLocaleString()}
-                      </span>
-                      {product.compareAtPrice && (
-                        <span className="text-xs text-muted-foreground line-through">
-                          ${product.compareAtPrice.toLocaleString()}
-                        </span>
-                      )}
+                <CometCard
+                  rotateDepth={12}
+                  translateDepth={10}
+                  className="rounded-xl border border-border bg-card overflow-hidden"
+                >
+                  <Link href={`/products/${product.slug}`}>
+                    <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-surface to-card">
+                      <Icon className="h-16 w-16 text-accent-blue/20" />
                     </div>
-                  </div>
-                </Link>
-              </motion.article>
+
+                    <div className="p-4">
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                        {product.brand}
+                      </span>
+                      <h3 className="mt-1 line-clamp-1 text-sm font-medium text-foreground">
+                        {product.name}
+                      </h3>
+                      <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-lg font-semibold text-foreground">
+                          ${product.price.toLocaleString()}
+                        </span>
+                        {product.compareAtPrice && (
+                          <span className="text-xs text-muted-foreground line-through">
+                            ${product.compareAtPrice.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </CometCard>
+              </motion.div>
             );
           })}
         </div>
