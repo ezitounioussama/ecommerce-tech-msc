@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/types";
 
@@ -15,6 +15,8 @@ export function CategorySidebar({
   selectedCategory,
   onSelectCategory,
 }: CategorySidebarProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <aside className="flex flex-col gap-1">
       <h2 className="mb-2 px-3 text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
@@ -36,9 +38,9 @@ export function CategorySidebar({
       {categories.map((category, index) => (
         <motion.div
           key={category._id}
-          initial={{ opacity: 0, x: -10 }}
+          initial={{ opacity: prefersReducedMotion ? 1 : 0, x: prefersReducedMotion ? 0 : -10 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.05 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.3, delay: prefersReducedMotion ? 0 : index * 0.05 }}
         >
           <button
             onClick={() => onSelectCategory(category._id)}

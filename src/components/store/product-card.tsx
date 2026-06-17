@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   IconDeviceLaptop,
   IconDeviceMobile,
@@ -31,15 +31,16 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index }: ProductCardProps) {
+  const prefersReducedMotion = useReducedMotion();
   const addItem = useCartStore((state) => state.addItem);
 
   const CategoryIcon = categoryIcons[product.categoryId] || IconDeviceLaptop;
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.4, delay: prefersReducedMotion ? 0 : index * (index < 20 ? 0.05 : 0.025), ease: "easeOut" }}
       className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-accent-blue/30 hover:shadow-[0_0_30px_-6px] hover:shadow-accent-blue/10"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-surface to-card">

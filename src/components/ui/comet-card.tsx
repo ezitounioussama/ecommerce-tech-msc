@@ -21,12 +21,13 @@ export const CometCard = ({
   children: React.ReactNode;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const mouseXSpring = useSpring(x);
-  const mouseYSpring = useSpring(y);
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
 
   const rotateX = useTransform(
     mouseYSpring,
@@ -39,41 +40,32 @@ export const CometCard = ({
     [`${rotateDepth}deg`, `-${rotateDepth}deg`],
   );
 
-  const translateX = useTransform(
-    mouseXSpring,
-    [-0.5, 0.5],
-    [`-${translateDepth}px`, `${translateDepth}px`],
-  );
-  const translateY = useTransform(
-    mouseYSpring,
-    [-0.5, 0.5],
-    [`${translateDepth}px`, `-${translateDepth}px`],
-  );
-
   const glareX = useTransform(mouseXSpring, [-0.5, 0.5], [0, 100]);
   const glareY = useTransform(mouseYSpring, [-0.5, 0.5], [0, 100]);
+
+  const translateX = useTransform(mouseXSpring, [-0.5, 0.5], [`-${translateDepth}px`, `${translateDepth}px`]);
+  const translateY = useTransform(mouseYSpring, [-0.5, 0.5], [`${translateDepth}px`, `-${translateDepth}px`]);
 
   const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, color-mix(in oklch, var(--ts-foreground) 15%, transparent) 10%, color-mix(in oklch, var(--ts-foreground) 10%, transparent) 20%, transparent 80%)`;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
+    const el = ref.current;
+    if (!el) return;
 
-    const rect = ref.current.getBoundingClientRect();
+    if (!rectRef.current) {
+      rectRef.current = el.getBoundingClientRect();
+    }
 
-    const width = rect.width;
-    const height = rect.height;
+    const { left, top, width, height } = rectRef.current;
+    const mouseX = e.clientX - left;
+    const mouseY = e.clientY - top;
 
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
-
-    x.set(xPct);
-    y.set(yPct);
+    x.set(mouseX / width - 0.5);
+    y.set(mouseY / height - 0.5);
   };
 
   const handleMouseLeave = () => {
+    rectRef.current = null;
     x.set(0);
     y.set(0);
   };
@@ -91,10 +83,9 @@ export const CometCard = ({
           boxShadow:
             "rgba(0, 0, 0, 0.01) 0px 520px 146px 0px, rgba(0, 0, 0, 0.04) 0px 333px 133px 0px, rgba(0, 0, 0, 0.26) 0px 83px 83px 0px, rgba(0, 0, 0, 0.29) 0px 21px 46px 0px",
         }}
-        initial={{ scale: 1, z: 0 }}
+        initial={{ scale: 1 }}
         whileHover={{
           scale: 1.05,
-          z: 50,
           transition: { duration: 0.2 },
         }}
         className="relative rounded-2xl"

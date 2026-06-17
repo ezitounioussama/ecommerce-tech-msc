@@ -42,7 +42,7 @@ export function AuthDialog() {
         </button>
       </div>
 
-      <DialogContent className="w-full max-w-md p-0 overflow-visible bg-background" showCloseButton={false}>
+      <DialogContent className="w-full sm:max-w-lg p-0 overflow-hidden bg-background" showCloseButton={false}>
         {mode === "sign-in" ? (
           <div className="flex flex-col">
             <div className="flex items-center justify-end p-2">
@@ -72,8 +72,8 @@ export function AuthDialog() {
               fallbackRedirectUrl="/"
               appearance={{
                 elements: {
-                  rootBox: "mx-auto w-full",
-                  card: "shadow-none border-0 bg-transparent",
+                  rootBox: "mx-auto w-full max-w-full",
+                  card: "shadow-none border-0 bg-transparent w-full",
                   headerTitle: "text-foreground",
                   headerSubtitle: "text-muted-foreground",
                   socialButtonsBlockButton: "border-border bg-card text-foreground hover:bg-muted",
@@ -89,15 +89,6 @@ export function AuthDialog() {
                 },
               }}
             />
-            <div className="flex items-center justify-center gap-1 px-6 pb-6 text-sm text-muted-foreground">
-              <span>Don't have an account?</span>
-              <button
-                onClick={() => setMode("sign-up")}
-                className="font-medium text-accent-blue hover:text-accent-blue/80"
-              >
-                Sign up
-              </button>
-            </div>
           </div>
         ) : (
           <div className="flex flex-col">
@@ -128,8 +119,8 @@ export function AuthDialog() {
               fallbackRedirectUrl="/"
               appearance={{
                 elements: {
-                  rootBox: "mx-auto w-full",
-                  card: "shadow-none border-0 bg-transparent",
+                  rootBox: "mx-auto w-full max-w-full",
+                  card: "shadow-none border-0 bg-transparent w-full",
                   headerTitle: "text-foreground",
                   headerSubtitle: "text-muted-foreground",
                   socialButtonsBlockButton: "border-border bg-card text-foreground hover:bg-muted",

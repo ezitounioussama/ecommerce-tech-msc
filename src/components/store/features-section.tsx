@@ -4,7 +4,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import createGlobe from "cobe";
 import { useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   IconShieldCheck,
   IconSearch,
@@ -46,7 +46,7 @@ export default function FeaturesSection() {
   ];
 
   return (
-    <div className="relative z-20 mx-auto max-w-7xl px-4 py-10 lg:py-40">
+    <div className="relative z-20 mx-auto max-w-7xl px-3 py-10 lg:py-40">
       <div className="px-8">
         <h4 className="mx-auto max-w-5xl text-center text-3xl font-medium tracking-tight lg:text-5xl lg:leading-tight">
           <DiaTextReveal
@@ -155,6 +155,7 @@ export const SkeletonOne = () => {
 };
 
 export const SkeletonTwo = () => {
+  const prefersReducedMotion = useReducedMotion();
   const items = [
     { label: "Gaming laptops under $1500", icon: "🎮" },
     { label: "Best wireless earbuds 2026", icon: "🎧" },
@@ -172,9 +173,9 @@ export const SkeletonTwo = () => {
         {items.map((item, idx) => (
           <motion.div
             key={idx}
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: prefersReducedMotion ? 1 : 0, x: prefersReducedMotion ? 0 : -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 * idx }}
+            transition={{ delay: prefersReducedMotion ? 0 : 0.1 * idx }}
             className="flex items-center gap-3 rounded-lg bg-card p-3 text-sm text-primary"
           >
             <span>{item.icon}</span>
@@ -227,15 +228,17 @@ export const Globe = ({ className }: { className?: string }) => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
     const globe = createGlobe(canvasRef.current, {
-      devicePixelRatio: 2,
-      width: 600 * 2,
-      height: 600 * 2,
+      devicePixelRatio: dpr,
+      width: 600 * dpr,
+      height: 600 * dpr,
       phi: 0,
       theta: 0,
       dark: 1,
       diffuse: 1.2,
-      mapSamples: 4000,
+      mapSamples: 2500,
       mapBrightness: 6,
       baseColor: [0.3, 0.3, 0.3],
       markerColor: [0.227, 0.51, 0.965],
@@ -249,15 +252,18 @@ export const Globe = ({ className }: { className?: string }) => {
       ],
     });
 
+    let running = true;
+
     const animate = () => {
-      globe.update({ phi: (performance.now() / 10000) % (Math.PI * 2) });
+      if (!running) return;
+      globe.update({ phi: (performance.now() / 12000) % (Math.PI * 2) });
       requestAnimationFrame(animate);
     };
 
-    const raf = requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
     return () => {
-      cancelAnimationFrame(raf);
+      running = false;
       globe.destroy();
     };
   }, []);

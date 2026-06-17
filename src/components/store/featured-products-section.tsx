@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { IconArrowRight, IconDeviceLaptop, IconCpu, IconDeviceMobile, IconKeyboard } from "@tabler/icons-react";
 import { buttonVariants } from "@/components/ui/button";
 import { CometCard } from "@/components/ui/comet-card";
@@ -10,6 +10,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export function FeaturedProductsSection() {
+  const prefersReducedMotion = useReducedMotion();
   const featured = MOCK_PRODUCTS.filter((p) => p.featured).slice(0, 4);
 
   const categoryIcons: Record<string, typeof IconDeviceLaptop> = {
@@ -23,10 +24,10 @@ export function FeaturedProductsSection() {
     <section className="relative overflow-hidden py-20 lg:py-32">
       <div className="mx-auto max-w-7xl px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          viewport={{ once: true, margin: "0px 0px -100px" }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
           className="flex items-end justify-between"
         >
           <div>
@@ -60,10 +61,10 @@ export function FeaturedProductsSection() {
             return (
               <motion.div
                 key={product._id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
+                viewport={{ once: true, margin: "0px 0px -100px" }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.4, delay: prefersReducedMotion ? 0 : index * 0.1 }}
               >
                 <CometCard
                   rotateDepth={12}
@@ -101,9 +102,9 @@ export function FeaturedProductsSection() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "0px 0px -100px" }}
           className="mt-8 text-center sm:hidden"
         >
           <Link

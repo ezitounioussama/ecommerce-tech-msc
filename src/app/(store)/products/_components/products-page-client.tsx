@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { IconSearch, IconLayoutGrid, IconList } from "@tabler/icons-react";
 import { ProductsGrid } from "@/components/store/products-grid";
 import { CategorySidebar } from "@/components/store/category-sidebar";
@@ -16,6 +16,7 @@ interface ProductsPageClientProps {
 }
 
 export function ProductsPageClient({ products, categories }: ProductsPageClientProps) {
+  const prefersReducedMotion = useReducedMotion();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sort, setSort] = useState("newest");
@@ -61,7 +62,7 @@ export function ProductsPageClient({ products, categories }: ProductsPageClientP
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
@@ -106,7 +107,7 @@ export function ProductsPageClient({ products, categories }: ProductsPageClientP
 
       <div className="flex gap-8">
         <motion.aside
-          layout
+          layout={prefersReducedMotion ? false : true}
           className={`
             hidden w-56 shrink-0 flex-col lg:flex
             ${isSidebarOpen ? "fixed inset-0 z-50 flex bg-background/80 backdrop-blur-sm lg:relative lg:inset-auto lg:z-auto lg:flex lg:bg-transparent lg:backdrop-blur-none" : ""}
