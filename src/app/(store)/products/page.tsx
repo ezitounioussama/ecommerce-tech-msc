@@ -1,5 +1,4 @@
-import { MOCK_PRODUCTS } from "@/constants/products";
-import { MOCK_CATEGORIES } from "@/constants/categories";
+import { getProducts, getCategories } from "@/lib/data";
 import { ProductsPageClient } from "./_components/products-page-client";
 
 export const metadata = {
@@ -13,11 +12,16 @@ export const metadata = {
   },
 };
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
+
   return (
     <ProductsPageClient
-      products={MOCK_PRODUCTS}
-      categories={MOCK_CATEGORIES}
+      products={products}
+      categories={categories}
     />
   );
 }

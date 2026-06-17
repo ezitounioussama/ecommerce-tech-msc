@@ -260,10 +260,7 @@ export const NavbarButton = ({
   children: React.ReactNode;
   className?: string;
   variant?: "primary" | "secondary" | "dark" | "gradient";
-} & (
-  | React.ComponentPropsWithoutRef<"a">
-  | React.ComponentPropsWithoutRef<"button">
-)) => {
+}) => {
   const baseStyles =
     "px-4 py-2 rounded-md text-sm font-semibold transition duration-200 inline-block text-center cursor-pointer";
 
@@ -278,13 +275,13 @@ export const NavbarButton = ({
       "bg-gradient-to-r from-accent-blue to-accent-purple text-primary-foreground",
   };
 
-  return (
-    <Tag
-      href={href || undefined}
-      className={cn(baseStyles, variantStyles[variant], className)}
-      {...props}
-    >
-      {children}
-    </Tag>
+  return React.createElement(
+    Tag,
+    {
+      href: href || undefined,
+      className: cn(baseStyles, variantStyles[variant], className),
+      ...props,
+    },
+    children,
   );
 };

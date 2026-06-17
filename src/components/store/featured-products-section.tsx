@@ -5,13 +5,13 @@ import { IconArrowRight, IconDeviceLaptop, IconCpu, IconDeviceMobile, IconKeyboa
 import { buttonVariants } from "@/components/ui/button";
 import { CometCard } from "@/components/ui/comet-card";
 import { DiaTextReveal } from "@/components/ui/dia-text-reveal";
-import { MOCK_PRODUCTS } from "@/constants/products";
+import type { Product } from "@/types";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-export function FeaturedProductsSection() {
+export function FeaturedProductsSection({ products }: { products: Product[] }) {
   const prefersReducedMotion = useReducedMotion();
-  const featured = MOCK_PRODUCTS.filter((p) => p.featured).slice(0, 4);
+  const featured = products.filter((p) => p.featured).slice(0, 4);
 
   const categoryIcons: Record<string, typeof IconDeviceLaptop> = {
     "cat-laptops": IconDeviceLaptop,

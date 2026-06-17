@@ -1,5 +1,8 @@
+import { getFeaturedProducts } from "@/lib/data";
 import { HomePageClient } from "./home-page-client";
 
-export default function HomePage() {
-  return <HomePageClient />;
+export default async function HomePage() {
+  const featuredProducts = await getFeaturedProducts();
+
+  return <HomePageClient featuredProducts={featuredProducts} />;
 }

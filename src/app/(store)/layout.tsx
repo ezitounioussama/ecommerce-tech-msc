@@ -1,4 +1,5 @@
 import { NavbarWrapper } from "@/components/store/navbar-wrapper";
+import { Footer } from "@/components/store/footer";
 
 export default function StoreLayout({
   children,
@@ -9,6 +10,7 @@ export default function StoreLayout({
     <>
       <NavbarWrapper />
       {children}
+      <Footer />
     </>
   );
 }

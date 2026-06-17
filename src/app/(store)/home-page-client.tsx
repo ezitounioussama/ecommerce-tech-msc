@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { Product } from "@/types";
 
 const HeroSection = dynamic(
   () => import("@/components/store/hero-section").then((m) => ({ default: m.HeroSection })),
@@ -17,12 +18,12 @@ const FeaturedProductsSection = dynamic(
   { ssr: false },
 );
 
-export function HomePageClient() {
+export function HomePageClient({ featuredProducts }: { featuredProducts: Product[] }) {
   return (
     <main className="flex flex-1 flex-col">
       <HeroSection />
       <FeaturesSection />
-      <FeaturedProductsSection />
+      <FeaturedProductsSection products={featuredProducts} />
     </main>
   );
 }
