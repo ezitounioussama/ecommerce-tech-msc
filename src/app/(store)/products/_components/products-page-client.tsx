@@ -60,7 +60,7 @@ export function ProductsPageClient({ products, categories }: ProductsPageClientP
   }, [products, selectedCategory, search, sort]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 mt-16">
       <motion.div
         initial={{ opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : -10 }}
         animate={{ opacity: 1, y: 0 }}
