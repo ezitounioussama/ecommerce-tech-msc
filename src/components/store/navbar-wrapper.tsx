@@ -13,6 +13,8 @@ import {
   NavbarLogo,
 } from "@/components/ui/resizable-navbar";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { CartButton } from "@/components/store/cart-button";
+import { CartDrawer } from "@/components/store/cart-drawer";
 import { AuthDialog } from "@/components/store/auth-dialog";
 import {
   Show,
@@ -54,6 +56,7 @@ export function NavbarWrapper() {
         <NavbarLogo />
         <NavItems items={navItems} />
         <div className="flex items-center gap-1">
+          <CartButton />
           <AnimatedThemeToggler />
           <AuthButtons />
         </div>
@@ -62,6 +65,7 @@ export function NavbarWrapper() {
         <MobileNavHeader>
           <NavbarLogo />
           <div className="flex items-center gap-2">
+            <CartButton />
             <AnimatedThemeToggler />
             <MobileNavToggle
               isOpen={isMobileMenuOpen}
@@ -90,6 +94,7 @@ export function NavbarWrapper() {
           </div>
         </MobileNavMenu>
       </MobileNav>
+      <CartDrawer />
     </Navbar>
   );
 }
