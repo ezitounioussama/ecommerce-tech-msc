@@ -88,7 +88,7 @@ export const CometCard = ({
           scale: 1.05,
           transition: { duration: 0.2 },
         }}
-        className="relative rounded-2xl"
+        className={cn("relative rounded-2xl", className)}
       >
         {children}
         <motion.div

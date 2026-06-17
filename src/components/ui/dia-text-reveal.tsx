@@ -234,10 +234,14 @@ export function DiaTextReveal({
       ? measuredWidths[activeIndex]
       : undefined
 
+  const activeText = texts[activeIndex];
+  const firstLetter = activeText.charAt(0);
+  const restText = activeText.slice(1);
+
   return (
     <motion.span
       ref={spanRef}
-      className={cn("align-bottom leading-[100%] text-inherit", className)}
+      className={cn("align-bottom leading-[100%] text-inherit heading-dropcap-wrap", className)}
       style={{
         transform: "translateY(-2px)",
         color: "transparent",
@@ -257,7 +261,8 @@ export function DiaTextReveal({
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
       {...props}
     >
-      {texts[activeIndex]}
+      <span className="heading-dropcap">{firstLetter}</span>
+      {restText}
     </motion.span>
   )
 }

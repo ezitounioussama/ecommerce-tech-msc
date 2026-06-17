@@ -1,14 +1,11 @@
 import {ClerkProvider} from "@clerk/nextjs";
 import {shadcn} from "@clerk/ui/themes";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { editorial } from "@/lib/fonts";
+import { Geist_Mono } from "next/font/google";
+import { poppins, pachel } from "@/lib/fonts";
+import { SmoothScroll } from "@/components/shared/smooth-scroll";
+import "lenis/dist/lenis.css";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -39,11 +36,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${editorial.variable} h-full antialiased`}
+      className={`${poppins.variable} ${geistMono.variable} ${pachel.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-primary">
         <ClerkProvider appearance={{theme: shadcn}}>
-          {children}
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
         </ClerkProvider>
       </body>
     </html>

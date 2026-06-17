@@ -40,6 +40,7 @@ export function FeaturedProductsSection() {
                 colors={["#3B82F6", "#818cf8", "#f472b6", "#34d399"]}
                 textColor="var(--color-foreground)"
                 className="heading-2"
+                once={false}
               />
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -69,7 +70,7 @@ export function FeaturedProductsSection() {
                 <CometCard
                   rotateDepth={12}
                   translateDepth={10}
-                  className="rounded-xl border border-border bg-card overflow-hidden"
+                  className="rounded-xl border border-card-border bg-card overflow-hidden"
                 >
                   <Link href={`/products/${product.slug}`}>
                     <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-surface to-card">

@@ -25,6 +25,7 @@
   --color-accent-foreground: var(--ts-accent-foreground);
   --color-destructive: var(--ts-destructive);
   --color-border: var(--ts-border);
+  --color-card-border: var(--ts-card-border);
   --color-input: var(--ts-input);
   --color-ring: var(--ts-ring);
   --color-chart-1: var(--ts-chart-1);
@@ -40,9 +41,9 @@
   --color-sidebar-accent-foreground: var(--ts-sidebar-accent-foreground);
   --color-sidebar-border: var(--ts-sidebar-border);
   --color-sidebar-ring: var(--ts-sidebar-ring);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-poppins);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-editorial);
+  --font-heading: var(--font-pachel);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -74,6 +75,7 @@
   --ts-accent-foreground: oklch(0.985 0 0);
   --ts-destructive: oklch(0.704 0.191 22.216);
   --ts-border: oklch(1 0 0 / 10%);
+  --ts-card-border: oklch(1 0 0 / 15%);
   --ts-input: oklch(1 0 0 / 15%);
   --ts-ring: oklch(0.556 0 0);
   --ts-chart-1: oklch(0.87 0 0);
@@ -94,6 +96,7 @@
 .light {
   --ts-bg: oklch(1 0 0);
   --ts-foreground: oklch(0.145 0 0);
+  --ts-surface: oklch(0.97 0 0);
   --ts-card: oklch(1 0 0);
   --ts-card-foreground: oklch(0.145 0 0);
   --ts-popover: oklch(1 0 0);
@@ -108,6 +111,7 @@
   --ts-accent-foreground: oklch(0.205 0 0);
   --ts-destructive: oklch(0.577 0.245 27.325);
   --ts-border: oklch(0.922 0 0);
+  --ts-card-border: oklch(0 0 0 / 15%);
   --ts-input: oklch(0.922 0 0);
   --ts-ring: oklch(0.708 0 0);
   --ts-chart-1: oklch(0.87 0 0);
@@ -182,6 +186,29 @@ body {
   line-height: 1.4;
   font-weight: 600;
   letter-spacing: 0.01em;
+}
+
+.heading-dropcap {
+  font-size: 1.4em;
+  float: left;
+  line-height: 0.9;
+  margin-right: 0.05em;
+  color: var(--color-foreground);
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+}
+
+.heading-dropcap-wrap {
+  display: inline-block;
+}
+
+h1[class*="heading-"]::first-letter,
+h2[class*="heading-"]::first-letter,
+h3[class*="heading-"]::first-letter,
+h4[class*="heading-"]::first-letter,
+p[class*="heading-"]::first-letter {
+  font-size: 1.4em;
 }
 
 @layer base {

@@ -72,6 +72,7 @@ export function ProductsPageClient({ products, categories }: ProductsPageClientP
                 colors={["#3B82F6", "#818cf8", "#f472b6"]}
                 textColor="var(--color-foreground)"
                 className="heading-1"
+                once={false}
               />
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">

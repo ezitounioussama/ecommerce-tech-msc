@@ -54,6 +54,7 @@ export default function FeaturesSection() {
             colors={["#3B82F6", "#818cf8", "#f472b6"]}
             textColor="var(--color-foreground)"
             className="heading-1"
+            once={false}
           />
           <br />
           <DiaTextReveal
@@ -61,6 +62,7 @@ export default function FeaturesSection() {
             colors={["#f472b6", "#818cf8", "#3B82F6"]}
             textColor="var(--color-accent-blue)"
             className="heading-1"
+            once={false}
           />
         </h4>
         <p className="mx-auto my-4 max-w-2xl text-center text-sm font-normal text-secondary lg:text-base">
