@@ -17,7 +17,7 @@ import { CartButton } from "@/components/store/cart-button";
 import { CartDrawer } from "@/components/store/cart-drawer";
 import { AuthDialog } from "@/components/store/auth-dialog";
 import {
-  Show,
+  useAuth,
   UserButton,
 } from "@clerk/nextjs";
 
@@ -29,22 +29,21 @@ const navItems = [
 ];
 
 function AuthButtons() {
-  return (
-    <>
-      <Show when="signed-out">
-        <AuthDialog />
-      </Show>
-      <Show when="signed-in">
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: "h-8 w-8",
-            },
-          }}
-        />
-      </Show>
-    </>
-  );
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (isLoaded && isSignedIn) {
+    return (
+      <UserButton
+        appearance={{
+          elements: {
+            avatarBox: "h-8 w-8",
+          },
+        }}
+      />
+    );
+  }
+
+  return <AuthDialog />;
 }
 
 export function NavbarWrapper() {

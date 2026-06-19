@@ -18,7 +18,7 @@ This project is a modern full-stack eCommerce platform focused on technology pro
 | Frontend                  | Next.js (App Router)                    |
 | Language                  | TypeScript                              |
 | Backend                   | Next.js Server Actions + Route Handlers |
-| Database                  | MongoDB                                 |
+| Database                  | MongoDB 8                               |
 | Authentication            | Clerk                                   |
 | Object Storage            | RustFS                                  |
 | Security Containerization | Docker                                  |
