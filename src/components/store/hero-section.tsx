@@ -4,9 +4,11 @@ import { MacbookScroll } from "@/components/ui/macbook-scroll";
 import { DiaTextReveal } from "@/components/ui/dia-text-reveal";
 
 export function HeroSection() {
+  const imageSrc = "/api/images/msc-website-public-images/hero.jpg";
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background">
       <MacbookScroll
+        src={imageSrc}
         title={
           <span className="flex flex-col items-center">
             <DiaTextReveal

@@ -167,7 +167,7 @@ export const Lid = ({
       >
         <div className="absolute inset-0 rounded-lg bg-[#272729]" />
         <Image
-          src={"/hero.jpg"}
+          src={src || "/hero.jpg"}
           alt="MacBook display"
           width={1280}
           height={720}
