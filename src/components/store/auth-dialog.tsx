@@ -35,7 +35,12 @@ export function AuthDialog() {
     <div className="flex items-center gap-1">
       <button
         type="button"
-        onClick={() => clerk.openSignIn({ appearance: getModalAppearance() })}
+        onClick={() =>
+          clerk.openSignIn({
+            fallbackRedirectUrl: "/",
+            appearance: getModalAppearance(),
+          })
+        }
         className="px-4 py-2 rounded-md text-sm font-semibold transition duration-200 bg-transparent text-secondary hover:text-primary"
       >
         Sign In

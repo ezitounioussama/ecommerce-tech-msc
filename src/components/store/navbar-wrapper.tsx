@@ -16,10 +16,7 @@ import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { CartButton } from "@/components/store/cart-button";
 import { CartDrawer } from "@/components/store/cart-drawer";
 import { AuthDialog } from "@/components/store/auth-dialog";
-import {
-  useAuth,
-  UserButton,
-} from "@clerk/nextjs";
+import { useUser, UserButton } from "@clerk/nextjs";
 
 const navItems = [
   { name: "Products", link: "/products" },
@@ -29,17 +26,28 @@ const navItems = [
 ];
 
 function AuthButtons() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, user } = useUser();
+  const isAdmin = user?.publicMetadata?.role === "admin";
 
   if (isLoaded && isSignedIn) {
     return (
-      <UserButton
-        appearance={{
-          elements: {
-            avatarBox: "h-8 w-8",
-          },
-        }}
-      />
+      <div className="flex items-center gap-2">
+        {isAdmin && (
+          <Link
+            href="/dashboard"
+            className="text-sm text-primary transition-colors hover:text-accent"
+          >
+            Dashboard
+          </Link>
+        )}
+        <UserButton
+          appearance={{
+            elements: {
+              avatarBox: "h-8 w-8",
+            },
+          }}
+        />
+      </div>
     );
   }
 
