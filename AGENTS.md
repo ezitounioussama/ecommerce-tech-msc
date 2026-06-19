@@ -629,12 +629,26 @@ build:
 
 These are resolved from `.env` (auto-loaded by docker compose). The `.env` file only contains public vars; secrets stay in `.env.docker` (runtime `env_file`).
 
+## Supporting Services
+
+### mongo-express
+
+Web-based MongoDB admin GUI. Accessible at `http://localhost:8081`. Default credentials: `admin` / `admin`. Connects to the `mongodb` service automatically.
+
+### Mailpit
+
+SMTP server + web UI for email testing. Captures all outgoing emails from the app in dev mode.
+
+- **SMTP**: `localhost:1025` (no auth, no TLS) — set `SMTP_HOST=mailpit`, `SMTP_PORT=1025` in `.env.docker`
+- **Web UI**: `http://localhost:8025` — view, inspect, and delete captured emails
+- Messages persist in a Docker volume (`mailpit_data`)
+
 ## File Reference
 
 | File | Purpose |
 |------|---------|
 | `Dockerfile` | 4-stage build (deps → dev → builder → runner) with bun cache mount and standalone output |
-| `docker-compose.yml` | Single service for nextjs, mongodb (volume: `mongodb_data`), rustfs (volumes: `rustfs_data`, `rustfs_logs`) |
+| `docker-compose.yml` | nextjs (dev target, volume mounts, hot reload) + mongodb:8 (volume: `mongodb_data`) + rustfs (volumes: `rustfs_data`, `rustfs_logs`) + mongo-express (web GUI at `:8081`) + mailpit (SMTP at `:1025`, web UI at `:8025`) |
 | `.env` | Build-time vars for docker-compose variable substitution (`NEXT_PUBLIC_*`) |
 | `.env.docker` | Runtime env vars for containers (secrets, service URLs) |
 | `.dockerignore` | Excludes `node_modules`, `.next`, `.git`, `.env`, `docs/`, `AGENTS.md`, logs |
