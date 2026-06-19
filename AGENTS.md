@@ -331,18 +331,32 @@ The project is linked to the TechSphere Clerk application (`app_3FHSCIZUZztc04ZX
 Key files:
 - `src/app/layout.tsx` — `ClerkProvider` wraps the entire app with `shadcn` theme
 - `src/proxy.ts` — `clerkMiddleware()` with Clerk proxy path
-- `src/components/store/navbar-wrapper.tsx` — `Show`, `SignInButton`, `SignUpButton`, `UserButton`
+- `src/components/store/navbar-wrapper.tsx` — `AuthButtons` (uses `useAuth()`), `UserButton`
+- `src/components/store/auth-dialog.tsx` — Sign In / Get Started buttons using `useClerk().openSignIn()`
 - `src/app/sign-in/[[...sign-in]]/page.tsx` — Sign-in page with `<SignIn />`
 - `src/app/sign-up/[[...sign-up]]/page.tsx` — Sign-up page with `<SignUp />`
 
 Components used from `@clerk/nextjs`:
 - `ClerkProvider` — wraps root layout
-- `Show` — renders children based on auth state (`"signed-in"` / `"signed-out"`)
-- `SignInButton` — modal-based sign-in trigger
-- `SignUpButton` — modal-based sign-up trigger
+- `useAuth` — client-side hook to check auth state (used in navbar)
+- `useClerk` — client-side hook to open Clerk's native modal (`openSignIn()`, `openSignUp()`)
 - `UserButton` — avatar + dropdown for signed-in users
 
-Auth controls use `mode="modal"` to open Clerk's hosted UI in a modal without navigating away.
+Auth controls use `useClerk().openSignIn()` to show Clerk's themed modal (styled via `shadcn` theme in ClerkProvider).
+
+### Modal Theming
+
+Clerk modals (sign-in, sign-up, user profile) are themed via `ClerkProvider` appearance in `layout.tsx`:
+
+- `colorBackground` — `var(--ts-card)` (CSS variable, reactive to dark/light toggle)
+- `colorModalBackdrop` — `var(--ts-backdrop)` (`rgba(0,0,0,0.5)` dark / `rgba(0,0,0,0.15)` light)
+- `colorInput` — `var(--ts-input)`
+- `cardBox` — layered `box-shadow` for 3D depth
+- `card`/`navbar`/`scrollBox`/`footer` — `background: var(--ts-card)`
+
+CSS variables `--ts-backdrop` are defined in `globals.css` `:root` and `.light` blocks.
+
+The `auth-dialog.tsx` also passes per-call `appearance` to `openSignIn()`/`openSignUp()` with the same values read via `document.documentElement.classList.contains("light")`.
 
 ## Requirements
 
@@ -514,6 +528,10 @@ Example:
 lib/config/env.ts
 ```
 
+Two env files for Docker:
+- `.env` — build-time vars for docker-compose (`NEXT_PUBLIC_*` only, safe to commit)
+- `.env.docker` — runtime secrets and service URLs (mounted as `env_file` in docker-compose)
+
 ---
 
 # File Uploads
@@ -523,6 +541,16 @@ Provider:
 ```txt
 RustFS
 ```
+
+## Implementation
+
+Accessed via `@aws-sdk/client-s3` with S3-compatible API. Import must use `eval("import(...)")` to bypass Turbopack's module name mangling in dev mode:
+
+```ts
+const { S3Client } = await eval(`import("@aws-sdk/client-s3")`);
+```
+
+Images are proxied through `/api/images/[...path]` to avoid CORS and enable central caching.
 
 Allowed:
 
@@ -559,11 +587,57 @@ mongodb
 rustfs
 ```
 
-Must support:
+## Setup
 
 ```bash
+docker compose up --build
+```
+
+The default `docker compose up --build` builds the `dev` target (full node_modules, `CMD` clears `.next` on start for fresh Turbopack cache) and runs `bun run dev` with hot reload via volume mounts — source changes appear immediately without rebuilding. Only re-run `--build` when `package.json` changes.
+
+### Production Build
+
+```bash
+docker compose run --rm nextjs bun run build
 docker compose up
 ```
+
+Or to skip the dev server and run the standalone build directly, override the command:
+
+```bash
+docker compose up --build -d
+docker compose exec nextjs bun run build
+docker compose exec nextjs bun server.js
+```
+
+## Build Optimization
+
+- `output: "standalone"` in `next.config.ts` — Next.js file tracing ships only used modules to the runner stage, reducing final image from ~1.5GB to ~400MB.
+- `--mount=type=cache,target=/root/.bun/install/cache` — caches bun package downloads across rebuilds. Only re-downloads when `package.json`/`bun.lock` changes.
+- Multi-stage Dockerfile: `deps` (bun install) → `dev` (source + `bun run dev`) → `builder` (next build) → `runner` (minimal runtime image).
+- `dev` stage is the default build target — clears `.next` on start to avoid stale Turbopack caches.
+
+## Build Args
+
+`NEXT_PUBLIC_*` env vars must be passed as build args so Next.js can inline them at build time:
+
+```yaml
+build:
+  args:
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+```
+
+These are resolved from `.env` (auto-loaded by docker compose). The `.env` file only contains public vars; secrets stay in `.env.docker` (runtime `env_file`).
+
+## File Reference
+
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | 4-stage build (deps → dev → builder → runner) with bun cache mount and standalone output |
+| `docker-compose.yml` | Single service for nextjs, mongodb (volume: `mongodb_data`), rustfs (volumes: `rustfs_data`, `rustfs_logs`) |
+| `.env` | Build-time vars for docker-compose variable substitution (`NEXT_PUBLIC_*`) |
+| `.env.docker` | Runtime env vars for containers (secrets, service URLs) |
+| `.dockerignore` | Excludes `node_modules`, `.next`, `.git`, `.env`, `docs/`, `AGENTS.md`, logs |
 
 ---
 

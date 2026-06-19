@@ -1,4 +1,3 @@
-import { S3Client, CreateBucketCommand, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import type { Readable } from "node:stream";
 
 const RUSTFS_URL = process.env.RUSTFS_URL || "http://localhost:9000";
@@ -7,26 +6,37 @@ const RUSTFS_SECRET_KEY = process.env.RUSTFS_SECRET_KEY || "rustfsadmin";
 
 const BUCKET = "msc-storage";
 
-let client: S3Client | null = null;
+let s3Module: Awaited<ReturnType<typeof loadS3>> | null = null;
 
-function getClient(): S3Client {
-  if (!client) {
-    client = new S3Client({
-      endpoint: RUSTFS_URL,
-      region: "us-east-1",
-      credentials: {
-        accessKeyId: RUSTFS_ACCESS_KEY,
-        secretAccessKey: RUSTFS_SECRET_KEY,
-      },
-      forcePathStyle: true,
-    });
+async function loadS3() {
+  return eval(`import("@aws-sdk/client-s3")`);
+}
+
+async function getS3Module() {
+  if (!s3Module) {
+    s3Module = await loadS3();
   }
-  return client;
+  return s3Module;
+}
+
+async function createClient() {
+  const { S3Client } = await getS3Module();
+  return new S3Client({
+    endpoint: RUSTFS_URL,
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: RUSTFS_ACCESS_KEY,
+      secretAccessKey: RUSTFS_SECRET_KEY,
+    },
+    forcePathStyle: true,
+  });
 }
 
 export async function ensureBucket(): Promise<void> {
+  const client = await createClient();
+  const { CreateBucketCommand } = await getS3Module();
   try {
-    await getClient().send(new CreateBucketCommand({ Bucket: BUCKET }));
+    await client.send(new CreateBucketCommand({ Bucket: BUCKET }));
   } catch {
     // bucket already exists
   }
@@ -37,7 +47,9 @@ export async function uploadImage(
   buffer: Buffer,
   contentType: string,
 ): Promise<string> {
-  await getClient().send(
+  const client = await createClient();
+  const { PutObjectCommand } = await getS3Module();
+  await client.send(
     new PutObjectCommand({
       Bucket: BUCKET,
       Key: `msc-website-public-images/${key}`,
@@ -51,8 +63,10 @@ export async function uploadImage(
 export async function getImage(
   key: string,
 ): Promise<{ data: Buffer; contentType: string } | null> {
+  const client = await createClient();
+  const { GetObjectCommand } = await getS3Module();
   try {
-    const result = await getClient().send(
+    const result = await client.send(
       new GetObjectCommand({
         Bucket: BUCKET,
         Key: key,

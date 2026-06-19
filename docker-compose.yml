@@ -1,37 +1,25 @@
 services:
-  # ── Production ────────────────────────────
   nextjs:
     build:
       context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env.docker
-    depends_on:
-      mongodb:
-        condition: service_started
-    restart: unless-stopped
-
-  # ── Development (hot reload, no rebuild) ──
-  nextjs-dev:
-    image: oven/bun:1
-    working_dir: /app
+      target: dev
+      args:
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+        NEXT_PUBLIC_CLERK_SIGN_IN_URL: ${NEXT_PUBLIC_CLERK_SIGN_IN_URL:-/sign-in}
+        NEXT_PUBLIC_CLERK_SIGN_UP_URL: ${NEXT_PUBLIC_CLERK_SIGN_UP_URL:-/sign-up}
+        NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: ${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:-/}
+        NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: ${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:-/}
     ports:
       - "3000:3000"
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+      - ./src:/app/src
+      - ./public:/app/public
     env_file:
       - .env.docker
     depends_on:
       mongodb:
         condition: service_started
-    command: sh -c "bun install --frozen-lockfile && bun run dev"
     restart: unless-stopped
-    profiles:
-      - dev
 
   mongodb:
     image: mongo:8

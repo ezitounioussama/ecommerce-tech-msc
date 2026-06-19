@@ -11,3 +11,20 @@ node_modules
 .idea
 *.tsbuildinfo
 next-env.d.ts
+
+# Docker files (not needed in build context)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Agent / docs
+AGENTS.md
+docs/
