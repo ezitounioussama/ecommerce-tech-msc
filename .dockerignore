@@ -28,3 +28,4 @@ Thumbs.db
 # Agent / docs
 AGENTS.md
 docs/
+.agents/
