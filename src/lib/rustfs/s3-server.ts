@@ -42,22 +42,38 @@ export async function ensureBucket(): Promise<void> {
   }
 }
 
+const PRODUCT_IMAGES_PREFIX = "msc-website-product-images";
+const PUBLIC_IMAGES_PREFIX = "msc-website-public-images";
+
 export async function uploadImage(
   key: string,
   buffer: Buffer,
   contentType: string,
+  folder = PUBLIC_IMAGES_PREFIX,
 ): Promise<string> {
   const client = await createClient();
   const { PutObjectCommand } = await getS3Module();
   await client.send(
     new PutObjectCommand({
       Bucket: BUCKET,
-      Key: `msc-website-public-images/${key}`,
+      Key: `${folder}/${key}`,
       Body: buffer,
       ContentType: contentType,
     }),
   );
-  return `/api/images/msc-website-public-images/${key}`;
+  return `/api/images/${folder}/${key}`;
+}
+
+export async function deleteImage(proxyUrl: string): Promise<void> {
+  const client = await createClient();
+  const { DeleteObjectCommand } = await getS3Module();
+  const key = proxyUrl.replace("/api/images/", "");
+  await client.send(
+    new DeleteObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+    }),
+  );
 }
 
 export async function getImage(
@@ -88,3 +104,5 @@ export async function getImage(
     return null;
   }
 }
+
+export { PRODUCT_IMAGES_PREFIX, PUBLIC_IMAGES_PREFIX };
