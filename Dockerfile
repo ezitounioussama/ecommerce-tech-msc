@@ -1,19 +1,22 @@
-FROM oven/bun:1 AS base
+FROM node:26-slim AS base
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
 
 # ── deps ─────────────────────────────────────
 FROM base AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN --mount=type=cache,target=/root/.bun/install/cache \
+RUN     --mount=type=cache,target=/root/.bun/install/cache \
+    npm install -g bun && \
     bun install --frozen-lockfile
 
 # ── dev ──────────────────────────────────────
-FROM deps AS dev
+FROM node:26-slim AS dev
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 EXPOSE 3000
-CMD ["sh", "-c", "rm -rf /app/.next && bun run dev"]
+CMD ["sh", "-c", "rm -rf /app/.next && npx next dev"]
 
 # ── builder ──────────────────────────────────
 FROM base AS builder
@@ -39,10 +42,10 @@ ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
 ARG NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
 ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
 
-RUN bun run build
+RUN npx next build
 
 # ── runner ───────────────────────────────────
-FROM base AS runner
+FROM node:26-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -56,4 +59,4 @@ COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]

@@ -19,6 +19,8 @@ services:
     depends_on:
       mongodb:
         condition: service_started
+      rustfs:
+        condition: service_started
     restart: unless-stopped
 
   mongodb:
