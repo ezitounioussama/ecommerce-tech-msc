@@ -32,6 +32,18 @@ This project is a modern full-stack eCommerce platform focused on technology pro
 
 ---
 
+## Setup (Fresh Clone)
+
+After cloning the repo, install the agent skills (not committed — they live in `.gitignore`):
+
+```bash
+./scripts/setup-skills.sh
+```
+
+This installs the Vercel Labs skill package into `.agents/skills/`, providing the AI agent with Clerk, design, and other domain-specific instructions. Restart opencode after installation.
+
+---
+
 # Core Principles
 
 1. Type Safety First
