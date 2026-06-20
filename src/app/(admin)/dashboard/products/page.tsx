@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 import { DataTable } from "@/components/admin/data-table";
@@ -23,26 +23,53 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { MOCK_PRODUCTS } from "@/constants/products";
-import { MOCK_CATEGORIES } from "@/constants/categories";
-import type { Product } from "@/types";
-
-let nextId = 200;
-function generateId() {
-  return `prod-${nextId++}`;
-}
+import {
+  getProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  type ProductFormData,
+} from "@/services/products";
+import { getCategories } from "@/services/categories";
+import { ProductImageUpload } from "@/components/admin/product-image-upload";
+import type { Product, Category } from "@/types";
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Product | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [formCategoryId, setFormCategoryId] = useState("");
-  const [formStatus, setFormStatus] = useState<"draft" | "published">("draft");
-  const [formFeatured, setFormFeatured] = useState(false);
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: "",
+    slug: "",
+    description: "",
+    brand: "",
+    price: 0,
+    stock: 0,
+    categoryId: "",
+    images: [],
+    status: "draft",
+    featured: false,
+  });
+
+  async function load() {
+    try {
+      const [prods, cats] = await Promise.all([getProducts(), getCategories()]);
+      setProducts(prods);
+      setCategories(cats);
+    } catch (err) {
+      console.error("Failed to load data:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
 
   const categoryMap = Object.fromEntries(
-    MOCK_CATEGORIES.map((c) => [c._id, c.name]),
+    categories.map((c) => [c._id, c.name]),
   );
 
   const columns: ColumnDef<Product>[] = [
@@ -69,18 +96,14 @@ export default function AdminProductsPage() {
       accessorKey: "price",
       header: "Price",
       cell: ({ row }) => (
-        <span className="font-mono text-sm">
-          ${row.original.price.toLocaleString()}
-        </span>
+        <span className="font-mono text-sm">${row.original.price.toLocaleString()}</span>
       ),
     },
     {
       accessorKey: "stock",
       header: "Stock",
       cell: ({ row }) => (
-        <span
-          className={row.original.stock < 10 ? "text-destructive" : "text-foreground"}
-        >
+        <span className={row.original.stock < 10 ? "text-destructive" : "text-foreground"}>
           {row.original.stock}
         </span>
       ),
@@ -89,10 +112,7 @@ export default function AdminProductsPage() {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge
-          variant={row.original.status === "published" ? "default" : "secondary"}
-          className="font-normal"
-        >
+        <Badge variant={row.original.status === "published" ? "default" : "secondary"} className="font-normal">
           {row.original.status}
         </Badge>
       ),
@@ -115,10 +135,20 @@ export default function AdminProductsPage() {
             variant="ghost"
             size="icon-xs"
             onClick={() => {
-              setEditing(row.original);
-              setFormCategoryId(row.original.categoryId);
-              setFormStatus(row.original.status);
-              setFormFeatured(row.original.featured);
+              const p = row.original;
+              setEditing(p);
+              setFormData({
+                name: p.name,
+                slug: p.slug,
+                description: p.description,
+                brand: p.brand,
+                price: p.price,
+                stock: p.stock,
+                categoryId: p.categoryId,
+                images: p.images ?? [],
+                status: p.status,
+                featured: p.featured,
+              });
               setDialogOpen(true);
             }}
           >
@@ -137,64 +167,48 @@ export default function AdminProductsPage() {
     },
   ];
 
-  function handleSave(formData: FormData) {
-    const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
-    const description = formData.get("description") as string;
-    const brand = formData.get("brand") as string;
-    const price = Number(formData.get("price"));
-    const stock = Number(formData.get("stock"));
-
-    if (editing) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p._id === editing._id
-            ? {
-                ...p,
-                name,
-                slug,
-                description,
-                brand,
-                price,
-                stock,
-                categoryId: formCategoryId || editing.categoryId,
-                status: formStatus,
-                featured: formFeatured,
-              }
-            : p,
-        ),
-      );
-    } else {
-      setProducts((prev) => [
-        ...prev,
-        {
-          _id: generateId(),
-          name,
-          slug,
-          description,
-          brand,
-          price,
-          stock,
-          categoryId: formCategoryId,
-          status: formStatus,
-          featured: formFeatured,
-          compareAtPrice: undefined,
-          images: [],
-          specifications: {},
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ]);
-    }
-
-    setDialogOpen(false);
-    setEditing(null);
+  function setField<K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) {
+    setFormData((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleDelete() {
+  async function handleSave(formData2: FormData) {
+    const payload: ProductFormData = {
+      name: formData2.get("name") as string || formData.name,
+      slug: formData2.get("slug") as string || formData.slug,
+      description: (formData2.get("description") as string) || formData.description || "",
+      brand: (formData2.get("brand") as string) || formData.brand,
+      price: Number(formData2.get("price")) || formData.price,
+      stock: Number(formData2.get("stock")) || formData.stock,
+      categoryId: formData.categoryId,
+      images: formData.images,
+      status: formData.status,
+      featured: formData.featured,
+    };
+
+    try {
+      if (editing) {
+        const updated = await updateProduct(editing._id, payload);
+        setProducts((prev) => prev.map((p) => (p._id === editing._id ? updated : p)));
+      } else {
+        const created = await createProduct(payload);
+        setProducts((prev) => [...prev, created]);
+      }
+      setDialogOpen(false);
+      setEditing(null);
+    } catch (err) {
+      console.error("Failed to save product:", err);
+    }
+  }
+
+  async function handleDelete() {
     if (!deleteId) return;
-    setProducts((prev) => prev.filter((p) => p._id !== deleteId));
-    setDeleteId(null);
+    try {
+      await deleteProduct(deleteId);
+      setProducts((prev) => prev.filter((p) => p._id !== deleteId));
+      setDeleteId(null);
+    } catch (err) {
+      console.error("Failed to delete product:", err);
+    }
   }
 
   return (
@@ -202,145 +216,68 @@ export default function AdminProductsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="heading-2 text-foreground">Products</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your product catalog
-          </p>
+          <p className="text-sm text-muted-foreground">Manage your product catalog</p>
         </div>
         <Dialog
           open={dialogOpen}
           onOpenChange={(open) => {
             setDialogOpen(open);
-            if (!open) setEditing(null);
+            if (!open) {
+              setEditing(null);
+              setFormData({ name: "", slug: "", description: "", brand: "", price: 0, stock: 0, categoryId: "", images: [], status: "draft", featured: false });
+            }
           }}
         >
-          <DialogTrigger
-            render={<Button><IconPlus className="h-4 w-4" /> Add Product</Button>}
-          />
+          <DialogTrigger render={<Button><IconPlus className="h-4 w-4" /> Add Product</Button>} />
           <DialogContent className="sm:max-w-lg">
             <form action={handleSave}>
               <DialogHeader>
                 <DialogTitle>{editing ? "Edit Product" : "Add Product"}</DialogTitle>
                 <DialogDescription>
-                  {editing
-                    ? "Update the product details below."
-                    : "Create a new product."}
+                  {editing ? "Update the product details below." : "Create a new product."}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4 py-4">
                 <div className="col-span-2 flex flex-col gap-1.5">
-                  <label
-                    htmlFor="name"
-                    className="text-sm font-medium text-foreground"
-                  >
-                    Name
-                  </label>
-                  <Input
-                    id="name"
-                    name="name"
-                    defaultValue={editing?.name ?? ""}
-                    required
-                  />
+                  <label htmlFor="name" className="text-sm font-medium text-foreground">Name</label>
+                  <Input id="name" name="name" defaultValue={editing?.name ?? ""} required />
                 </div>
                 <div className="col-span-2 flex flex-col gap-1.5">
-                  <label
-                    htmlFor="slug"
-                    className="text-sm font-medium text-foreground"
-                  >
-                    Slug
-                  </label>
-                  <Input
-                    id="slug"
-                    name="slug"
-                    defaultValue={editing?.slug ?? ""}
-                    required
-                  />
+                  <label htmlFor="slug" className="text-sm font-medium text-foreground">Slug</label>
+                  <Input id="slug" name="slug" defaultValue={editing?.slug ?? ""} required />
                 </div>
                 <div className="col-span-2 flex flex-col gap-1.5">
-                  <label
-                    htmlFor="description"
-                    className="text-sm font-medium text-foreground"
-                  >
-                    Description
-                  </label>
-                  <Input
-                    id="description"
-                    name="description"
-                    defaultValue={editing?.description ?? ""}
-                  />
+                  <label htmlFor="description" className="text-sm font-medium text-foreground">Description</label>
+                  <Input id="description" name="description" defaultValue={editing?.description ?? ""} />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label
-                    htmlFor="brand"
-                    className="text-sm font-medium text-foreground"
-                  >
-                    Brand
-                  </label>
-                  <Input
-                    id="brand"
-                    name="brand"
-                    defaultValue={editing?.brand ?? ""}
-                    required
-                  />
+                  <label htmlFor="brand" className="text-sm font-medium text-foreground">Brand</label>
+                  <Input id="brand" name="brand" defaultValue={editing?.brand ?? ""} required />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-foreground">
-                    Category
-                  </label>
-                  <Select
-                    value={formCategoryId}
-                    onValueChange={(v) => setFormCategoryId(v ?? "")}
-                  >
+                  <label className="text-sm font-medium text-foreground">Category</label>
+                  <Select value={formData.categoryId} onValueChange={(v) => setField("categoryId", v ?? "")}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {MOCK_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat._id} value={cat._id}>
-                          {cat.name}
-                        </SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label
-                    htmlFor="price"
-                    className="text-sm font-medium text-foreground"
-                  >
-                    Price ($)
-                  </label>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    step="0.01"
-                    defaultValue={editing?.price ?? ""}
-                    required
-                  />
+                  <label htmlFor="price" className="text-sm font-medium text-foreground">Price ($)</label>
+                  <Input id="price" name="price" type="number" step="0.01" defaultValue={editing?.price ?? ""} required />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label
-                    htmlFor="stock"
-                    className="text-sm font-medium text-foreground"
-                  >
-                    Stock
-                  </label>
-                  <Input
-                    id="stock"
-                    name="stock"
-                    type="number"
-                    defaultValue={editing?.stock ?? ""}
-                    required
-                  />
+                  <label htmlFor="stock" className="text-sm font-medium text-foreground">Stock</label>
+                  <Input id="stock" name="stock" type="number" defaultValue={editing?.stock ?? ""} required />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-foreground">
-                    Status
-                  </label>
-                  <Select
-                    value={formStatus}
-                    onValueChange={(v) => setFormStatus((v ?? "draft") as "draft" | "published")}
-                  >
+                  <label className="text-sm font-medium text-foreground">Status</label>
+                  <Select value={formData.status} onValueChange={(v) => setField("status", (v ?? "draft") as "draft" | "published")}>
                     <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
@@ -350,12 +287,19 @@ export default function AdminProductsPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="col-span-2 flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-foreground">Images (max 5)</label>
+                  <ProductImageUpload
+                    value={formData.images ?? []}
+                    onChange={(urls) => setField("images", urls)}
+                  />
+                </div>
                 <div className="flex items-end pb-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                     <input
                       type="checkbox"
-                      checked={formFeatured}
-                      onChange={(e) => setFormFeatured(e.target.checked)}
+                      checked={formData.featured}
+                      onChange={(e) => setField("featured", e.target.checked)}
                       className="h-4 w-4 rounded border-card-border bg-card accent-accent-blue"
                     />
                     Featured
@@ -363,40 +307,27 @@ export default function AdminProductsPage() {
                 </div>
               </div>
               <DialogFooter showCloseButton>
-                <Button type="submit">
-                  {editing ? "Save Changes" : "Create Product"}
-                </Button>
+                <Button type="submit">{editing ? "Save Changes" : "Create Product"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={products}
-        searchKey="name"
-        searchPlaceholder="Search products..."
-      />
+      {loading ? (
+        <div className="flex items-center justify-center py-20 text-muted-foreground">Loading...</div>
+      ) : (
+        <DataTable columns={columns} data={products} searchKey="name" searchPlaceholder="Search products..." />
+      )}
 
-      <Dialog
-        open={!!deleteId}
-        onOpenChange={(open) => {
-          if (!open) setDeleteId(null);
-        }}
-      >
+      <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Delete Product</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this product? This action cannot be
-              undone.
-            </DialogDescription>
+            <DialogDescription>Are you sure you want to delete this product? This action cannot be undone.</DialogDescription>
           </DialogHeader>
           <DialogFooter showCloseButton>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

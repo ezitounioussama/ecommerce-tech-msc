@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 import { DataTable } from "@/components/admin/data-table";
@@ -15,20 +15,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { MOCK_CATEGORIES } from "@/constants/categories";
+import {
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "@/services/categories";
 import type { Category } from "@/types";
-import { cn } from "@/lib/utils";
-
-let nextId = 100;
-function generateId() {
-  return `cat-${nextId++}`;
-}
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Category | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  async function load() {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (err) {
+      console.error("Failed to load categories:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
 
   const columns: ColumnDef<Category>[] = [
     {
@@ -76,38 +89,37 @@ export default function AdminCategoriesPage() {
     },
   ];
 
-  function handleSave(formData: FormData) {
+  async function handleSave(formData: FormData) {
     const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
     const slug = formData.get("slug") as string;
+    const description = formData.get("description") as string;
 
-    if (editing) {
-      setCategories((prev) =>
-        prev.map((c) =>
-          c._id === editing._id ? { ...c, name, description, slug } : c,
-        ),
-      );
-    } else {
-      setCategories((prev) => [
-        ...prev,
-        {
-          _id: generateId(),
-          name,
-          slug,
-          description,
-          image: "",
-        },
-      ]);
+    try {
+      if (editing) {
+        const updated = await updateCategory(editing._id, { name, slug, description });
+        setCategories((prev) =>
+          prev.map((c) => (c._id === editing._id ? updated : c)),
+        );
+      } else {
+        const created = await createCategory({ name, slug, description });
+        setCategories((prev) => [...prev, created]);
+      }
+      setDialogOpen(false);
+      setEditing(null);
+    } catch (err) {
+      console.error("Failed to save category:", err);
     }
-
-    setDialogOpen(false);
-    setEditing(null);
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!deleteId) return;
-    setCategories((prev) => prev.filter((c) => c._id !== deleteId));
-    setDeleteId(null);
+    try {
+      await deleteCategory(deleteId);
+      setCategories((prev) => prev.filter((c) => c._id !== deleteId));
+      setDeleteId(null);
+    } catch (err) {
+      console.error("Failed to delete category:", err);
+    }
   }
 
   return (
@@ -131,39 +143,16 @@ export default function AdminCategoriesPage() {
               </DialogHeader>
               <div className="flex flex-col gap-4 py-4">
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="name" className="text-sm font-medium text-foreground">
-                    Name
-                  </label>
-                  <Input
-                    id="name"
-                    name="name"
-                    defaultValue={editing?.name ?? ""}
-                    placeholder="e.g. Laptops"
-                    required
-                  />
+                  <label htmlFor="name" className="text-sm font-medium text-foreground">Name</label>
+                  <Input id="name" name="name" defaultValue={editing?.name ?? ""} placeholder="e.g. Laptops" required />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="slug" className="text-sm font-medium text-foreground">
-                    Slug
-                  </label>
-                  <Input
-                    id="slug"
-                    name="slug"
-                    defaultValue={editing?.slug ?? ""}
-                    placeholder="e.g. laptops"
-                    required
-                  />
+                  <label htmlFor="slug" className="text-sm font-medium text-foreground">Slug</label>
+                  <Input id="slug" name="slug" defaultValue={editing?.slug ?? ""} placeholder="e.g. laptops" required />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="description" className="text-sm font-medium text-foreground">
-                    Description
-                  </label>
-                  <Input
-                    id="description"
-                    name="description"
-                    defaultValue={editing?.description ?? ""}
-                    placeholder="Brief description of the category"
-                  />
+                  <label htmlFor="description" className="text-sm font-medium text-foreground">Description</label>
+                  <Input id="description" name="description" defaultValue={editing?.description ?? ""} placeholder="Brief description" />
                 </div>
               </div>
               <DialogFooter showCloseButton>
@@ -174,12 +163,11 @@ export default function AdminCategoriesPage() {
         </Dialog>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={categories}
-        searchKey="name"
-        searchPlaceholder="Search categories..."
-      />
+      {loading ? (
+        <div className="flex items-center justify-center py-20 text-muted-foreground">Loading...</div>
+      ) : (
+        <DataTable columns={columns} data={categories} searchKey="name" searchPlaceholder="Search categories..." />
+      )}
 
       <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
         <DialogContent className="sm:max-w-sm">
@@ -190,12 +178,7 @@ export default function AdminCategoriesPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter showCloseButton>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-            >
-              Delete
-            </Button>
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
