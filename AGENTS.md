@@ -78,8 +78,13 @@ src/
 │   ├── users/
 │   └── reviews/
 │
+├── services/
+│
 ├── lib/
+│   ├── axios.ts
 │   ├── mongodb/
+│   │   ├── index.ts
+│   │   └── collections.ts
 │   ├── rustfs/
 │   ├── clerk/
 │   ├── validations/
@@ -242,26 +247,29 @@ All data fetching must use the `"use cache"` directive to enable automatic cachi
 
 ### `use cache` Data Layer
 
-Create data access functions in `src/lib/data/` with `"use cache"` per function:
+Create data access functions in `src/lib/data/` with `"use cache"` per function. Query MongoDB via collection helpers:
 
 ```ts
 // src/lib/data/products.ts
-import { MOCK_PRODUCTS } from "@/constants/products";
+import { getProductsCollection } from "@/lib/mongodb/collections";
 import type { Product } from "@/types";
 
 export async function getProducts(): Promise<Product[]> {
   "use cache";
-  return MOCK_PRODUCTS;
+  const col = await getProductsCollection();
+  return col.find().toArray() as Promise<Product[]>;
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   "use cache";
-  return MOCK_PRODUCTS.find((p) => p.slug === slug) ?? null;
+  const col = await getProductsCollection();
+  return col.findOne({ slug }) as Promise<Product | null>;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   "use cache";
-  return MOCK_PRODUCTS.filter((p) => p.featured);
+  const col = await getProductsCollection();
+  return col.find({ featured: true }).toArray() as Promise<Product[]>;
 }
 ```
 
@@ -389,18 +397,10 @@ MongoDB
 Use:
 
 ```txt
-Mongoose
-```
-
-or
-
-```txt
 MongoDB Native Driver
 ```
 
-consistently across the project.
-
-Do not mix both approaches.
+(`mongodb` npm package, not Mongoose). Consistent across the project. No mixing of approaches.
 
 ---
 
@@ -450,6 +450,207 @@ Minimum fields:
   createdAt: Date;
   updatedAt: Date;
 }
+```
+
+---
+
+# Collections
+
+Typed collection helpers live in `src/lib/mongodb/collections.ts`:
+
+```ts
+import { getDb } from ".";
+import type { Product, Category } from "@/types";
+
+const DB_NAME = "techsphere";
+
+export async function getProductsCollection() {
+  const db = await getDb(DB_NAME);
+  return db.collection<Product>("products");
+}
+
+export async function getCategoriesCollection() {
+  const db = await getDb(DB_NAME);
+  return db.collection<Category>("categories");
+}
+```
+
+Add new collection helpers when adding a new collection type.
+
+---
+
+# API Routes
+
+RESTful CRUD endpoints live in `src/app/api/{resource}/`. Each resource has:
+
+- `src/app/api/{resource}/route.ts` — `GET` (list), `POST` (create)
+- `src/app/api/{resource}/[id]/route.ts` — `PUT` (update), `DELETE`
+
+All routes use `get{Resource}Collection()` from `collections.ts` and handle errors returning `NextResponse.json` with appropriate status codes.
+
+Existing resources: `products`, `categories`.
+
+Pattern for list:
+
+```ts
+export async function GET() {
+  const col = await getProductsCollection();
+  const items = await col.find().toArray();
+  return NextResponse.json(items);
+}
+```
+
+Pattern for create:
+
+```ts
+export async function POST(req: Request) {
+  const body = await req.json();
+  const col = await getProductsCollection();
+  const doc = { ...body, createdAt: new Date(), updatedAt: new Date() };
+  const result = await col.insertOne(doc);
+  return NextResponse.json({ ...doc, _id: result.insertedId }, { status: 201 });
+}
+```
+
+Pattern for update:
+
+```ts
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const body = await req.json();
+  const col = await getProductsCollection();
+  await col.updateOne({ _id: id }, { $set: { ...body, updatedAt: new Date() } });
+  return NextResponse.json({ success: true });
+}
+```
+
+Pattern for delete:
+
+```ts
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const col = await getProductsCollection();
+  await col.deleteOne({ _id: id });
+  return NextResponse.json({ success: true });
+}
+```
+
+---
+
+# Seed Database
+
+File: `src/app/api/seed/route.ts`
+
+- `POST /api/seed` — drops existing documents and inserts mock data (6 categories, 12 products) from `src/constants/`
+- `DELETE /api/seed` — deletes all documents from both collections
+
+Useful for resetting the database during development:
+
+```bash
+curl -X POST http://localhost:3000/api/seed
+```
+
+---
+
+# Axios Instance
+
+File: `src/lib/axios.ts`
+
+Shared axios instance used by all client-side service modules:
+
+```ts
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "/api",
+  headers: { "Content-Type": "application/json" },
+});
+
+export default api;
+```
+
+Base URL is `/api` so service calls look like `api.get("/products")`.
+
+---
+
+# Service Layer
+
+Client-side service modules live in `src/services/`. One file per resource. Each uses the shared axios instance for CRUD:
+
+```ts
+// src/services/categories.ts
+import api from "@/lib/axios";
+import type { Category } from "@/types";
+
+export async function getCategories(): Promise<Category[]> {
+  const { data } = await api.get("/categories");
+  return data;
+}
+
+export async function createCategory(name: string): Promise<Category> {
+  const { data } = await api.post("/categories", { name });
+  return data;
+}
+
+export async function updateCategory(id: string, name: string): Promise<void> {
+  await api.put(`/categories/${id}`, { name });
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  await api.delete(`/categories/${id}`);
+}
+```
+
+Existing services: `products`, `categories`.
+
+Typed form data for product creation/editing:
+
+```ts
+// src/services/products.ts
+export interface ProductFormData {
+  name: string;
+  slug: string;
+  description: string;
+  categoryId: string;
+  price: number;
+  compareAtPrice?: number;
+  stock: number;
+  images: string[];
+  specifications: Record<string, string>;
+  brand: string;
+  featured: boolean;
+  status: "draft" | "published";
+}
+```
+
+---
+
+# Admin CRUD Data Flow
+
+1. **Server Component** renders admin page with `"use client"` components
+2. **Client Component** calls service function on mount (`useEffect` or event handler)
+3. **Service** calls axios (`api.get("/products")`)
+4. **API Route** receives request, calls collection helper, queries MongoDB
+5. **Response** flows back through the chain
+
+```
+[Admin Page] → [Service] → [Axios] → [API Route] → [Collection Helper] → [MongoDB]
+```
+
+---
+
+# MONGODB_URI
+
+For local development outside Docker, `MONGODB_URI` must point to a running MongoDB instance:
+
+```env
+MONGODB_URI=mongodb://localhost:27017/techsphere
+```
+
+Inside Docker, the service hostname `mongodb` is used instead:
+
+```env
+MONGODB_URI=mongodb://mongodb:27017/techsphere
 ```
 
 ---
@@ -573,6 +774,34 @@ Validate:
 
 before upload.
 
+## Product Image Upload (Admin)
+
+Product images are stored in the `msc-storage` bucket under the `msc-website-product-images/` prefix.
+
+### Upload Flow
+
+1. Admin selects images in the `ProductImageUpload` component (uses `@reui/use-file-upload` hook)
+2. On file selection, `uploadProductImage()` (in `src/services/products.ts`) sends each file as `multipart/form-data` to `POST /api/upload`
+3. The endpoint calls `uploadImage(key, buffer, contentType, "msc-website-product-images")` from `s3-server.ts`
+4. Returns a proxy URL: `/api/images/msc-website-product-images/{unique-key}.{ext}`
+5. The URL is stored in the product's `images` array in MongoDB
+
+### Delete Flow
+
+- When a product is deleted, `DELETE /api/products/[id]` calls `deleteImage(proxyUrl)` for each image before removing the MongoDB document
+- `deleteImage` sends a `DeleteObjectCommand` to RustFS with the extracted S3 key
+
+### Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `POST /api/upload` | FormData (`file`) | Upload single image, returns `{ url }` |
+| `GET /api/images/[...path]` | GET | Serve image from RustFS via proxy |
+
+### Component
+
+`src/components/admin/product-image-upload.tsx` — drag-and-drop UI, max 5 images, preview thumbnails, per-image delete.
+
 ---
 
 # Docker
@@ -593,12 +822,12 @@ rustfs
 docker compose up --build
 ```
 
-The default `docker compose up --build` builds the `dev` target (full node_modules, `CMD` clears `.next` on start for fresh Turbopack cache) and runs `bun run dev` with hot reload via volume mounts — source changes appear immediately without rebuilding. Only re-run `--build` when `package.json` changes.
+The default `docker compose up --build` builds the `dev` target (full node_modules, `CMD` clears `.next` on start for fresh Turbopack cache) and runs `npx next dev` with hot reload via volume mounts — source changes appear immediately without rebuilding. Only re-run `--build` when `package.json` changes.
 
 ### Production Build
 
 ```bash
-docker compose run --rm nextjs bun run build
+docker compose run --rm nextjs npx next build
 docker compose up
 ```
 
@@ -606,15 +835,15 @@ Or to skip the dev server and run the standalone build directly, override the co
 
 ```bash
 docker compose up --build -d
-docker compose exec nextjs bun run build
-docker compose exec nextjs bun server.js
+docker compose exec nextjs npx next build
+docker compose exec nextjs node server.js
 ```
 
 ## Build Optimization
 
 - `output: "standalone"` in `next.config.ts` — Next.js file tracing ships only used modules to the runner stage, reducing final image from ~1.5GB to ~400MB.
 - `--mount=type=cache,target=/root/.bun/install/cache` — caches bun package downloads across rebuilds. Only re-downloads when `package.json`/`bun.lock` changes.
-- Multi-stage Dockerfile: `deps` (bun install) → `dev` (source + `bun run dev`) → `builder` (next build) → `runner` (minimal runtime image).
+- Multi-stage Dockerfile: `deps` (bun install) → `dev` (source + `npx next dev`) → `builder` (`npx next build`) → `runner` (`node server.js`).
 - `dev` stage is the default build target — clears `.next` on start to avoid stale Turbopack caches.
 
 ## Build Args
@@ -647,7 +876,7 @@ SMTP server + web UI for email testing. Captures all outgoing emails from the ap
 
 | File | Purpose |
 |------|---------|
-| `Dockerfile` | 4-stage build (deps → dev → builder → runner) with bun cache mount and standalone output |
+| `Dockerfile` | 4-stage build (deps → dev → builder → runner) on `node:26-slim`, bun for deps only, `npx next dev` / `npx next build` / `node server.js` |
 | `docker-compose.yml` | nextjs (dev target, volume mounts, hot reload) + mongodb:8 (volume: `mongodb_data`) + rustfs (volumes: `rustfs_data`, `rustfs_logs`) + mongo-express (web GUI at `:8081`) + mailpit (SMTP at `:1025`, web UI at `:8025`) |
 | `.env` | Build-time vars for docker-compose variable substitution (`NEXT_PUBLIC_*`) |
 | `.env.docker` | Runtime env vars for containers (secrets, service URLs) |
