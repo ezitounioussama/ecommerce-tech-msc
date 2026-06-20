@@ -1,4 +1,11 @@
-import { MongoClient } from "mongodb";
+import type { MongoClient as MongoClientType } from "mongodb";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { MongoClient } = require("mongodb") as {
+  MongoClient: typeof MongoClientType;
+};
 
 const MONGODB_URI: string = process.env.MONGODB_URI ?? "";
 
@@ -6,17 +13,17 @@ if (!MONGODB_URI) {
   throw new Error("MONGODB_URI environment variable is not defined");
 }
 
-let client: MongoClient | null = null;
-let clientPromise: Promise<MongoClient>;
+let client: MongoClientType | null = null;
+let clientPromise: Promise<MongoClientType>;
 
-async function connect(): Promise<MongoClient> {
+async function connect(): Promise<MongoClientType> {
   if (client) return client;
   client = new MongoClient(MONGODB_URI);
   clientPromise = client.connect();
   return clientPromise;
 }
 
-export async function getClient(): Promise<MongoClient> {
+export async function getClient(): Promise<MongoClientType> {
   return connect();
 }
 
