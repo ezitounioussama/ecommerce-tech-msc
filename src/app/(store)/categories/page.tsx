@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MOCK_CATEGORIES } from "@/constants/categories";
+import { getCategories } from "@/lib/data/categories";
 import { CategoriesGrid } from "@/components/store/categories-grid";
 
 export const metadata: Metadata = {
@@ -7,7 +7,9 @@ export const metadata: Metadata = {
   description: "Browse products by category at TechSphere.",
 };
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  const categories = await getCategories();
+
   return (
     <div className="mx-auto mt-24 max-w-7xl px-4 py-16">
       <h1 className="heading-1 text-foreground">Categories</h1>
@@ -15,7 +17,7 @@ export default function CategoriesPage() {
         Explore our curated collection by category.
       </p>
       <div className="mt-10">
-        <CategoriesGrid categories={MOCK_CATEGORIES} />
+        <CategoriesGrid categories={categories} />
       </div>
     </div>
   );

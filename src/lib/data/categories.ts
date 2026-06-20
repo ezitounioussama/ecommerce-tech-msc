@@ -1,12 +1,14 @@
-import { MOCK_CATEGORIES } from "@/constants/categories";
+import { getCategoriesCollection } from "@/lib/mongodb/collections";
 import type { Category } from "@/types";
 
 export async function getCategories(): Promise<Category[]> {
   "use cache";
-  return MOCK_CATEGORIES;
+  const col = await getCategoriesCollection();
+  return col.find({}).sort({ name: 1 }).toArray();
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   "use cache";
-  return MOCK_CATEGORIES.find((c) => c.slug === slug) ?? null;
+  const col = await getCategoriesCollection();
+  return col.findOne({ slug });
 }
