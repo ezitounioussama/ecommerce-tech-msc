@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { env } from "@/lib/config/env";
+import { contactFormEmail } from "@/email-templates/contact-form";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -55,8 +56,6 @@ export async function sendContactMessage(
     };
   }
 
-  const companyText = company ? `\nCompany: ${company}` : "";
-
   try {
     const response = await fetch(PLUNK_API, {
       method: "POST",
@@ -68,16 +67,7 @@ export async function sendContactMessage(
         to: env.contactEmail,
         subject: `New Contact Form Message from ${name}`,
         reply: email,
-        body: `
-          <h2>New Contact Form Submission</h2>
-          <table style="border-collapse:collapse;width:100%;max-width:600px">
-            <tr><td style="padding:8px;font-weight:bold">Name:</td><td style="padding:8px">${name}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold">Email:</td><td style="padding:8px">${email}</td></tr>
-            ${company ? `<tr><td style="padding:8px;font-weight:bold">Company:</td><td style="padding:8px">${company}</td></tr>` : ""}
-          </table>
-          <h3>Message:</h3>
-          <p style="white-space:pre-wrap">${message}</p>
-        `,
+        body: contactFormEmail({ name, email, company, message }),
       }),
     });
 
