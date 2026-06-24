@@ -4,6 +4,7 @@ import { shadcn } from "@clerk/ui/themes";
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import { poppins, pachel } from "@/lib/fonts";
+import { Toaster } from "@/components/ui/toaster";
 import { SmoothScroll } from "@/components/shared/smooth-scroll";
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -69,6 +70,7 @@ export default function RootLayout({
             },
           }}
         >
+          <Toaster />
           <Suspense fallback={null}>
             <SmoothScroll>{children}</SmoothScroll>
           </Suspense>
