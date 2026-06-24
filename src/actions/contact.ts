@@ -67,6 +67,10 @@ export async function sendContactMessage(
         to: env.contactEmail,
         subject: `New Contact Form Message from ${name}`,
         reply: email,
+        from: {
+          name: "TechSphere Contact",
+          email: env.contactEmail,
+        },
         body: contactFormEmail({ name, email, company, message }),
       }),
     });
@@ -74,7 +78,7 @@ export async function sendContactMessage(
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      console.error("Plunk API error:", result);
+      console.error("Plunk API error:", JSON.stringify(result));
       return {
         success: false,
         error: "Message could not be sent. Please try again later.",
@@ -82,6 +86,7 @@ export async function sendContactMessage(
       };
     }
 
+    console.log("Plunk email sent:", JSON.stringify(result));
     return { success: true };
   } catch (error) {
     console.error("Failed to send contact email via Plunk:", error);

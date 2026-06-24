@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { DiaTextReveal } from "@/components/ui/dia-text-reveal";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
   IconCheck,
 } from "@tabler/icons-react";
 import { sendContactMessage, type ContactState } from "@/actions/contact";
+import { toastSuccess, toastError } from "@/components/ui/alerts";
 import { cn } from "@/lib/utils";
 
 const contactInfo = [
@@ -52,6 +53,14 @@ export function ContactPageClient() {
     sendContactMessage,
     initialState,
   );
+
+  useEffect(() => {
+    if (state.success) {
+      toastSuccess("Message sent! We'll get back to you shortly.");
+    } else if (state.error) {
+      toastError(state.error);
+    }
+  }, [state.success, state.error]);
 
   const stagger = (index: number) => ({
     initial: { opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : 20 },

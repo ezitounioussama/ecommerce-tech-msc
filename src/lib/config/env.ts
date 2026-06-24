@@ -11,4 +11,5 @@ export const env = {
   plunkSecretKey: process.env.PLUNK_SECRET_KEY,
   plunkPublicKey: process.env.NEXT_PUBLIC_PLUNK_PUBLIC_KEY,
   contactEmail: process.env.CONTACT_EMAIL,
+  baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
 } as const;
