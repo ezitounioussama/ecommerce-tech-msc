@@ -42,13 +42,31 @@ export interface User {
   role: "customer" | "admin";
 }
 
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+
 export interface Order {
   _id: string;
   userId: string;
   items: CartItem[];
   total: number;
-  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  status: OrderStatus;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingAddress: Address;
+  paymentMethod: "card" | "wallet";
+  paymentId?: string;
+  transactionId?: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Review {

@@ -1,5 +1,5 @@
 import { getDb } from ".";
-import type { Product, Category } from "@/types";
+import type { Product, Category, Order } from "@/types";
 
 const DB_NAME = "techsphere";
 
@@ -11,4 +11,9 @@ export async function getProductsCollection() {
 export async function getCategoriesCollection() {
   const db = await getDb(DB_NAME);
   return db.collection<Category>("categories");
+}
+
+export async function getOrdersCollection() {
+  const db = await getDb(DB_NAME);
+  return db.collection<Order>("orders");
 }
