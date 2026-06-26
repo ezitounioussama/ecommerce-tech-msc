@@ -1,6 +1,12 @@
+import { createCheckoutSession } from "@/services/stripe";
+import type { CartItem } from "@/types";
+
 interface PaymentRequest {
   amount: number;
   orderId: string;
+  items: CartItem[];
+  customerEmail: string;
+  customerName: string;
 }
 
 interface PaymentResponse {
@@ -9,17 +15,23 @@ interface PaymentResponse {
   redirectUrl: string | null;
 }
 
-class MockPaymentService {
-  async initiateCardPayment(request: PaymentRequest): Promise<PaymentResponse> {
-    // Simulate processing delay
-    await new Promise((r) => setTimeout(r, 600));
+class StripePaymentService {
+  async initiateCardPayment(
+    request: PaymentRequest,
+  ): Promise<PaymentResponse> {
+    const session = await createCheckoutSession({
+      items: request.items,
+      orderId: request.orderId,
+      customerEmail: request.customerEmail,
+      customerName: request.customerName,
+    });
 
     return {
-      status: "completed",
-      transactionId: `mock_txn_${request.orderId.slice(0, 8)}_${Date.now()}`,
-      redirectUrl: null,
+      status: "pending",
+      transactionId: session.sessionId,
+      redirectUrl: session.url,
     };
   }
 }
 
-export const paymentService = new MockPaymentService();
+export const paymentService = new StripePaymentService();

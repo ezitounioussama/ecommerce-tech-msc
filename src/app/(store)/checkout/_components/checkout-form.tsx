@@ -248,10 +248,10 @@ export function CheckoutForm() {
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  Test Payment (Mock)
+                  Credit Card (via Stripe)
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Simulated 3D Secure flow for development testing
+                  Securely processed by Stripe. 3D Secure enabled.
                 </p>
               </div>
             </div>

@@ -12,4 +12,6 @@ export const env = {
   plunkPublicKey: process.env.NEXT_PUBLIC_PLUNK_PUBLIC_KEY,
   contactEmail: process.env.CONTACT_EMAIL,
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+  stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 } as const;

@@ -61,15 +61,15 @@ export async function POST(req: Request) {
     const payment = await paymentService.initiateCardPayment({
       amount: total,
       orderId,
+      items,
+      customerEmail,
+      customerName,
     });
-
-    const orderStatus = payment.status === "completed" ? "confirmed" : "pending";
 
     await col.updateOne(
       { _id: orderId },
       {
         $set: {
-          status: orderStatus,
           transactionId: payment.transactionId,
           updatedAt: new Date(),
         },
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json({
-      success: orderStatus === "confirmed",
+      success: false,
       orderId,
       transactionId: payment.transactionId,
       redirectUrl: payment.redirectUrl,

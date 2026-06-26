@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getOrderById } from "@/lib/data";
+import { getOrdersCollection } from "@/lib/mongodb/collections";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CheckoutSuccessClient } from "./success-client";
@@ -10,13 +11,49 @@ export const metadata = {
 };
 
 export default async function CheckoutSuccessPage(props: {
-  searchParams: Promise<{ orderId?: string }>;
+  searchParams: Promise<{ session_id?: string; orderId?: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
   const searchParams = await props.searchParams;
-  const { orderId } = searchParams;
+  const { session_id, orderId: directOrderId } = searchParams;
+
+  let orderId = directOrderId;
+
+  if (session_id) {
+    const { verifySession } = await import("@/services/stripe");
+    const result = await verifySession(session_id);
+    if (result.status !== "paid" && result.status !== "complete") {
+      return (
+        <main className="mx-auto max-w-2xl px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold text-foreground">Payment Not Confirmed</h1>
+          <p className="mt-2 text-muted-foreground">
+            Your payment has not been confirmed yet. It may still be processing.
+          </p>
+          <Link
+            href="/"
+            className="mt-6 inline-flex rounded-full bg-foreground px-6 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+          >
+            Back to Home
+          </Link>
+        </main>
+      );
+    }
+    orderId = result.orderId;
+
+    const col = await getOrdersCollection();
+    await col.updateOne(
+      { _id: orderId },
+      { $set: { status: "confirmed", paymentId: session_id, updatedAt: new Date() } },
+    );
+  } else if (directOrderId) {
+    const col = await getOrdersCollection();
+    await col.updateOne(
+      { _id: directOrderId },
+      { $set: { status: "confirmed", updatedAt: new Date() } },
+    );
+  }
 
   if (!orderId) {
     return (
